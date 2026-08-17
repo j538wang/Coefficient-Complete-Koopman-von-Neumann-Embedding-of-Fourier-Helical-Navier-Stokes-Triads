@@ -1,0 +1,68 @@
+{
+  "total_cases": 6400,
+  "active_cases": 6388,
+  "single_g_min": 0.3333784934233941,
+  "single_g_median": 0.6071198957111068,
+  "single_g_mean": 0.673483792993532,
+  "single_g_max": 1.0,
+  "signature_counts": {
+    "indefinite": 6028,
+    "singular": 360
+  },
+  "positive_rescaling_counts": {
+    "pass": 6028,
+    "singular": 360
+  },
+  "rescaled_created_mode_counts": {
+    "P": 2924,
+    "K": 2774,
+    "Q": 330
+  },
+  "max_rescaled_coefficient_residual_relative": 1.0755684115874288e-14,
+  "max_rescaled_energy_weight_residual_relative": 8.831692888900464e-15,
+  "max_rescaled_helicity_weight_residual_relative": 2.1114299099253495e-14,
+  "rescaling_condition_median": 2.283576702133515,
+  "rescaling_condition_q99": 7.714692323031027,
+  "rescaling_condition_max": 8.276867414377673,
+  "global_helicity_reversal_pairs": 3194,
+  "global_helicity_reversal_status_mismatches": 0,
+  "global_helicity_reversal_created_mode_mismatches": 0,
+  "max_global_helicity_reversal_scale_relative_difference": 3.4693517679241223e-16,
+  "max_energy_residual_relative": 9.086998133567032e-15,
+  "max_helicity_residual_relative": 2.1824548691394225e-14,
+  "max_gauge_realness_residual": 1.1130121369199911e-14,
+  "by_helicity": {
+    "(+1,+1,+1)": {
+      "indefinite": 713,
+      "singular": 81
+    },
+    "(+1,+1,-1)": {
+      "indefinite": 752,
+      "singular": 48
+    },
+    "(+1,-1,+1)": {
+      "indefinite": 770,
+      "singular": 30
+    },
+    "(+1,-1,-1)": {
+      "indefinite": 779,
+      "singular": 21
+    },
+    "(-1,+1,+1)": {
+      "indefinite": 779,
+      "singular": 21
+    },
+    "(-1,+1,-1)": {
+      "indefinite": 770,
+      "singular": 30
+    },
+    "(-1,-1,+1)": {
+      "indefinite": 752,
+      "singular": 48
+    },
+    "(-1,-1,-1)": {
+      "indefinite": 713,
+      "singular": 81
+    }
+  }
+}

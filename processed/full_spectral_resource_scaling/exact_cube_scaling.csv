@@ -1,0 +1,7 @@
+spectral_cutoff_K,grid_points_G,dealiased_grid_side_P,dealiased_grid_points_Gpad,nonzero_wavevectors_W,independent_complex_helicity_amplitudes,real_kvn_coordinates_and_native_CV_data_modes,exact_noncollinear_unordered_triad_geometries,helicity_resolved_triads,direct_real_cubic_monomials_empirical_estimate,direct_real_cubic_monomials_rigorous_upper_bound,direct_first_order_non_gaussian_cubic_phase_primitives_empirical_estimate,direct_first_order_non_gaussian_cubic_phase_primitives_upper_bound,structured_local_real_cubic_monomials,structured_first_order_non_gaussian_cubic_phase_primitives,structured_asymptotic_strang_non_gaussian_cubic_phase_primitives_per_step,empirical_direct_to_structured_cubic_primitive_ratio
+1,27,4,64,26,26,52,44,352,4084,8448,16335,33792,384,1536,3072,10.634940513462743
+2,125,7,343,124,124,248,1068,8544,99125,205056,396502,820224,2058,8232,16464,48.165879537251875
+3,343,10,1000,342,342,684,8232,65856,764045,1580544,3056180,6322176,6000,24000,48000,127.34084408265498
+4,729,13,2197,728,728,1456,37352,298816,3466790,7171584,13867158,28686336,13182,52728,105456,262.994197415557
+5,1331,16,4096,1330,1330,2660,124764,998112,11579849,23954688,46319397,95818752,24576,98304,196608,471.1852692548528
+6,2197,19,6859,2196,2196,4392,339900,2719200,31547488,65260800,126189950,261043200,41154,164616,329232,766.5715978795714

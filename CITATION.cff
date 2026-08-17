@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite the associated manuscript and this repository."
+title: "Reproducibility archive for Coefficient-Complete Koopman-von Neumann Embedding of Fourier-Helical Navier-Stokes Triads"
+type: software
+authors:
+  - family-names: Wang
+    given-names: Jialin
+    email: j538wang@uwaterloo.ca
+    affiliation: University of Waterloo
+  - family-names: Lien
+    given-names: Fue-Sang
+    email: fslien@uwaterloo.ca
+    affiliation: University of Waterloo
+  - family-names: Yee
+    given-names: Eugene
+    email: yee.ec0309@gmail.com
+    affiliation: University of Waterloo
+repository-code: "https://github.com/j538wang/Coefficient-Complete-Koopman-von-Neumann-Embedding-of-Fourier-Helical-Navier-Stokes-Triads"
+date-released: "2026-08-17"

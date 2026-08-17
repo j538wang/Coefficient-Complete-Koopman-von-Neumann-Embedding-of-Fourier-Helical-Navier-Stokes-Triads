@@ -1,0 +1,144 @@
+{
+  "input_csv": "processed/unified_ensemble/phase_gauge_ensemble.csv",
+  "network": {
+    "shared_complex_modes": [
+      "K",
+      "P",
+      "Q_plus",
+      "Q_minus"
+    ],
+    "complex_mode_count": 4,
+    "real_coordinate_count": 8,
+    "kvn_canonical_pairs_q_p": 8,
+    "triad_count": 2,
+    "source_rows": [
+      {
+        "geom_id": 745,
+        "K": "(3, 0, -2)",
+        "P": "(0, -2, -3)",
+        "Q": "(3, 2, 1)",
+        "helicity": [
+          1,
+          -1,
+          1
+        ],
+        "created_mode_in_local_rescaling": "K",
+        "CK": [
+          1.0217416117725835,
+          -2.0655149268302435
+        ],
+        "CP": [
+          -0.0189276341444712,
+          -0.0382634028060793
+        ],
+        "CQ": [
+          -1.002813977628112,
+          -2.027251524024164
+        ]
+      },
+      {
+        "geom_id": 745,
+        "K": "(3, 0, -2)",
+        "P": "(0, -2, -3)",
+        "Q": "(3, 2, 1)",
+        "helicity": [
+          1,
+          -1,
+          -1
+        ],
+        "created_mode_in_local_rescaling": "P",
+        "CK": [
+          -0.0426706839758257,
+          -0.0012474203952337
+        ],
+        "CP": [
+          2.30342646567024,
+          -0.0673375930375584
+        ],
+        "CQ": [
+          -2.2607557816944137,
+          0.0660901726423249
+        ]
+      }
+    ]
+  },
+  "kvn_generator": {
+    "formula": "H=1/2 sum_a (p_a F_a(q)+F_a(q) p_a)",
+    "canonical_commutator": "[q_a,p_b]=i delta_ab",
+    "heisenberg_identity": "i[H,q_a]=F_a(q) (hbar=1)",
+    "quadratic_generator_term_count": 48,
+    "all_generator_coefficients_real": true,
+    "maximum_abs_generator_coefficient": 2.30342646567024,
+    "uses_global_positive_rescaling": false,
+    "uses_mean_field_factorization": false,
+    "divergence_linear_coefficient_max_abs": 0.0
+  },
+  "verification": {
+    "maximum_generic_state_coefficient_reconstruction_relative_error": 1.0626992572192948e-16,
+    "maximum_isolated_triad_coefficient_reconstruction_relative_error": 7.307600335812393e-17,
+    "heisenberg_polynomial_reconstruction_max_abs": 0.0,
+    "energy_commutator_polynomial_max_abs": 8.881784197001252e-16,
+    "helicity_commutator_polynomial_max_abs": 3.552713678800501e-15,
+    "tolerance": 1e-12
+  },
+  "arbitrary_state_first_moment_no_go": {
+    "state_a_complex_center": [
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "state_b_complex_center": [
+      [
+        -1.0,
+        -0.0
+      ],
+      [
+        -1.0,
+        -0.0
+      ],
+      [
+        -0.0,
+        -0.0
+      ],
+      [
+        -0.0,
+        -0.0
+      ]
+    ],
+    "mixture_mean_center": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "norm_of_affine_derivative_minus_rhs_at_mean": 3.1985573671218126,
+    "closed_for_all_states": false,
+    "reason": "Quantum evolution and observable expectation are affine in the density operator, whereas a genuinely quadratic F is not affine in its argument."
+  },
+  "claim_boundary": "The KvN generator exactly embeds the coefficient-complete shared-mode vector field as a Heisenberg operator identity. For a general wavepacket, first moments evolve as <F(q)>, not F(<q>); deterministic trajectories require sharply localized states or a separate readout/conditioning scheme."
+}

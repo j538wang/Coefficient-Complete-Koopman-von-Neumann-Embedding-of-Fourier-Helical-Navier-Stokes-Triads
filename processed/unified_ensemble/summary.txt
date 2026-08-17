@@ -1,0 +1,84 @@
+Phase-gauge triad validation summary
+====================================
+kmax: 3
+max_geometries: 800
+delta_grid: 1440
+total rows: 6400
+active rows: 6388
+inactive/error rows: 12
+
+Energy constraint residual C_K + C_P^* + C_Q^*:
+  max abs: 1.144e-15
+  mean abs: 2.834e-16
+  max rel: 9.087e-15
+  mean rel: 1.347e-16
+  median rel: 8.121e-17
+  99% rel quantile: 8.581e-16
+
+Helicity constraint residual sK|K| C_K + sP|P| C_P^* + sQ|Q| C_Q^*:
+  max abs: 6.405e-15
+  mean abs: 1.555e-15
+  max rel: 2.182e-14
+  mean rel: 2.596e-16
+  median rel: 1.110e-16
+  99% rel quantile: 2.779e-15
+
+Conservation residual summary table written to conservation_residual_statistics.csv.
+Figures written to energy_helicity_residual_hist.png and energy_vs_helicity_residual_scatter.png.
+
+Single-g residual:
+  median rel: 6.071e-01
+  mean rel: 6.735e-01
+  max rel: 1.000e+00
+
+Metric realness residual before/after phase gauge:
+  baseline eta_im_rel median: 2.722e-01
+  gauge eta_im_rel median: 1.442e-16
+  baseline eta_im_rel mean: 3.024e-01
+  gauge eta_im_rel mean: 2.518e-16
+  gauge eta_im_rel max: 1.113e-14
+
+Gauge-invariant C_P/C_Q collinearity obstruction:
+  median |sin phase diff|: 1.780e-16
+  mean |sin phase diff|: 1.362e-02
+  max |sin phase diff|: 1.000e+00
+
+Baseline metric class counts:
+  complex_metric: 6132 (95.99%)
+  indefinite: 120 (1.88%)
+  positive_definite: 8 (0.13%)
+  singular: 128 (2.00%)
+
+Gauge-optimized metric class counts:
+  indefinite: 6028 (94.36%)
+  singular: 360 (5.64%)
+
+Phase-gauge success count: 6388 (100.00%)
+Converted complex->real count: 6132 (95.99%)
+
+Positive diagonal rescaling audit after created-mode reorientation:
+  pass: 6028 (94.36%)
+  singular: 360 (5.64%)
+  created-mode counts:
+    K: 2774
+    P: 2924
+    Q: 330
+  max realness residual: 1.076e-14
+  max coefficient reconstruction residual: 1.076e-14
+  max coefficient-balance residual: 8.827e-15
+  max energy-weight residual: 8.832e-15
+  max helicity-weight residual: 2.111e-14
+  scaling condition median: 2.28358
+  scaling condition 99% quantile: 7.71469
+  scaling condition maximum: 8.27687
+
+Interpretation:
+  Energy and helicity residuals near machine precision show that the same
+  active ensemble is conservative in both quadratic invariants before metric
+  classification and positive-rescaling construction are interpreted.
+  Every nonsingular gauge-real triple has exactly one created-mode orientation
+  with sign pattern (+,-,-), and the positive diagonal scaling reconstructs
+  all three directed coefficients and both weighted number invariants.
+  Singular cases are not covered by a finite strictly positive scaling.
+  This is a local closed-triad construction; consistency of one scale per
+  shared Fourier-helicity mode across the assembled graph is not inferred.

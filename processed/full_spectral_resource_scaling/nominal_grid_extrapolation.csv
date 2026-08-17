@@ -1,0 +1,5 @@
+nominal_grid_side,grid_points_G,dealiased_grid_side,dealiased_grid_points_Gpad,native_CV_data_modes_approximately,fitted_unordered_triad_geometries,fitted_direct_first_order_non_gaussian_cubic_phase_primitives,structured_first_order_non_gaussian_cubic_phase_primitives,fitted_direct_to_structured_ratio,logical_qubits_if_binary_cutoff_d16
+16,4096,24,13824,8190,1183258,439291588,331776,1324.0607755312546,32760
+32,32768,48,110592,65534,75901592,28178929584,2654208,10616.699815615042,262136
+64,262144,96,884736,524286,4866985341,1806898021601,21233664,85095.91286748191,2097144
+128,2097152,192,7077888,4194302,312067746373,115857056076306,169869312,682036.4120642708,16777208

@@ -1,0 +1,11 @@
+input: data_jhtdb/isotropic1024coarse_t002432_s16_velocity.npz
+N: 64
+mode: galerkin23
+helical_velocity_reconstruction_rel_l2: 2.3185742099203051e-16
+rhs_helical_sum_rel_l2: 8.3323991182861125e-16
+T_E_rel_l2: 3.8069707977830113e-16
+T_H_rel_l2: 4.6701847055586593e-16
+Pi_E_rel_l2: 4.4238404081984595e-16
+Pi_H_rel_l2: 1.5577263142155187e-15
+channel_sum_T_E_rel_l2: 3.9197068287313817e-16
+channel_sum_T_H_rel_l2: 6.4318535669000172e-16
