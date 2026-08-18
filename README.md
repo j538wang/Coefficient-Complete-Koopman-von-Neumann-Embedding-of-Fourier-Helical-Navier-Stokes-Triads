@@ -2,7 +2,7 @@
 
 This public repository contains the code and processed data supporting the manuscript **Coefficient-Complete Koopman--von Neumann Embedding of Fourier--Helical Navier--Stokes Triads** by Jialin Wang, Fue-Sang Lien, and Eugene Yee.
 
-It contains the scripts and processed outputs used for the coefficient ensemble, shared-scale graph audit, global Koopman--von Neumann (KvN) assembly, restricted finite-Fock gate calculation, spectral resource enumeration, Taylor--Green vortex (TGV) checks, and Johns Hopkins Turbulence Database (JHTDB) checks.
+It contains the scripts and processed outputs used for the coefficient ensemble, complete $K_{\max}=3$ shared-scale graph audit, global Koopman--von Neumann (KvN) assembly, restricted Gaussian and cubic gate calculation, spectral resource enumeration, Taylor--Green vortex (TGV) checks, and Johns Hopkins Turbulence Database (JHTDB) checks.
 
 ## Quick verification
 
@@ -13,6 +13,7 @@ python verify_archive.py
 ```
 
 This check verifies the SHA-256 manifest and the principal numerical values reported in the manuscript.
+After an intentional archive update, regenerate the manifest with `python generate_manifest.py` before running the verification command.
 
 ## Archive structure
 
@@ -20,7 +21,7 @@ This check verifies the SHA-256 manifest and the principal numerical values repo
 - `code/tgv` contains the serial and MPI TGV evolution and post-processing scripts, including the batch scripts used on Alliance Canada.
 - `code/jhtdb` contains the JHTDB acquisition and helical reconstruction scripts.
 - `processed` contains the machine-readable CSV, JSON, TXT, and NPZ inputs and outputs used in the manuscript.
-- `figures` contains the three external figure files included by the LaTeX manuscript.
+- `figures` contains the external figure files included by the LaTeX manuscript.
 - `MANIFEST.csv` records the SHA-256 digest, byte size, and path of every archived file except the manifest itself.
 
 ## Environment
@@ -49,7 +50,31 @@ python code/core/kvn_two_triad_gate_validation.py --csv derived/unified_ensemble
 python code/core/full_spectral_resource_scaling.py --max-cutoff 6 --kvn-summary derived/kvn_global_graph_audit/global_kvn_summary.json --out derived/full_spectral_resource_scaling
 ```
 
-The finite-Fock command is the most demanding core calculation. Its `--plot-only` option regenerates the figure from existing scan CSV files.
+The finite-Fock command is the most demanding diagnostic-subset calculation. Its `--plot-only` option regenerates the figure from existing scan CSV files.
+
+## Complete Kmax=3 graph and B+ gate workflow
+
+The complete coefficient scan contains three created-mode orientations for every closed triad. The following workflow generates the full intermediate scan, retains one representative of each reality-reduced closed support, assembles the 342-node compatibility system and the 684-coordinate KvN field, and calibrates the resource count from the complete graph.
+
+```text
+python code/core/phase_gauge_triad_validation.py --kmax 3 --max-geometries -1 --out derived/full_kmax3_ensemble
+python code/core/deduplicate_reality_reduced_triads.py --csv derived/full_kmax3_ensemble/phase_gauge_ensemble.csv --out derived/full_kmax3_unique
+python code/core/global_scaling_compatibility_audit.py --csv derived/full_kmax3_unique/phase_gauge_ensemble.csv --out derived/full_kmax3_global_scaling_audit
+python code/core/kvn_global_graph_audit.py --csv derived/full_kmax3_unique/phase_gauge_ensemble.csv --expected-active 32880 --expected-nodes 342 --reality-reduced-full-cube --out derived/full_kmax3_kvn_graph_audit
+python code/core/full_spectral_resource_scaling.py --max-cutoff 6 --kvn-summary derived/full_kmax3_kvn_graph_audit/global_kvn_summary.json --out derived/full_spectral_resource_scaling_bplus
+```
+
+The first intermediate CSV exceeds GitHub's single-file limit. The public archive therefore retains the 32,928-row deduplicated CSV used by every downstream audit, together with the deduplication summary and the script that regenerates the intermediate file. The complete downstream outputs include 60,000 scale constraints and 734,176 combined KvN terms.
+
+The B+ gate audit instantiates every passive Gaussian map, the single-mode cubic-phase operation, and the inverse map on the four-coordinate real restriction. It uses a local tensor-product cutoff as a boundary-stress test and a passive-invariant total-number cutoff as an independent compilation check.
+
+```text
+python code/core/kvn_two_triad_gate_validation.py --csv processed/unified_ensemble/phase_gauge_ensemble.csv --out derived/kvn_two_triad_gate_validation_bplus --tau-end 0.18 --selected-cutoff 10 --selected-amplitude 2.5
+python code/core/kvn_gaussian_total_number_validation.py --csv processed/unified_ensemble/phase_gauge_ensemble.csv --out derived/kvn_two_triad_gate_validation_bplus --selected-cutoff 16
+python code/core/make_gaussian_bplus_figure.py --local-cutoff derived/kvn_two_triad_gate_validation_bplus/gaussian_compilation_cutoff_scan.csv --global-cutoff derived/kvn_two_triad_gate_validation_bplus/global_fock_gaussian_cutoff_scan.csv --global-strang derived/kvn_two_triad_gate_validation_bplus/global_fock_gaussian_strang_scan.csv --out derived/kvn_two_triad_gate_validation_bplus
+```
+
+The processed B+ directory records the residual after every subgate, the boundary population, the Gaussian and non-Gaussian gate counts, and the maximum and total cubic strengths.
 
 ## TGV workflow
 
@@ -79,11 +104,11 @@ Repeat the commands for the other seven time indices and then pass the eight `*_
 
 ## Scope
 
-The archive reproduces the conservative coefficient and operator audits reported in the manuscript. The resource calculation is a structured primitive-count analysis. Physical Gaussian map and unmap circuits, viscous quantum evolution, fault-tolerant synthesis, and end-to-end speedup are outside the validated scope.
+The archive reproduces the conservative coefficient and operator audits reported in the manuscript. The restricted four-coordinate calculation validates ideal passive Gaussian map--single-mode-cubic--inverse-map circuits under two independent truncation schemes. The resource calculation is a structured primitive-count analysis. Extension to the full eight-coordinate complex network, physical cubic-gate imperfections, viscous quantum evolution, fault-tolerant synthesis, and end-to-end speedup remain open.
 
 ## Data availability
 
-The code and processed data supporting the study are included in this repository. Raw JHTDB velocity fields are third-party data and are available through JHTDB under its access and usage conditions. The repository records the dataset, time indices, sampling stride, acquisition scripts, and processed comparison outputs needed to repeat the external-data workflow.
+The code and processed data supporting the study are included in this repository. Each archived file appears in `MANIFEST.csv` with its byte size and SHA-256 digest. Raw JHTDB velocity fields are third-party data and are available through JHTDB under its access and usage conditions. The repository records the dataset, time indices, sampling stride, acquisition scripts, and processed comparison outputs needed to repeat the external-data workflow.
 
 ## Citation
 

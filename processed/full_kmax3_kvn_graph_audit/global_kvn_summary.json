@@ -1,0 +1,42 @@
+{
+  "input_csv": "processed/full_kmax3_unique/phase_gauge_ensemble.csv",
+  "source_total_rows": 32928,
+  "source_active_triads": 32880,
+  "source_nonsingular_triads": 30000,
+  "source_singular_triads": 2880,
+  "shared_complex_fourier_helicity_nodes": 342,
+  "real_kvn_coordinate_count": 684,
+  "kvn_canonical_q_p_pairs": 684,
+  "complex_to_real_normalization": "u_s(k)=(q_R+i q_I)/sqrt(2) with one representative of each {k,-k} pair",
+  "hermitian_generator": "H=1/2 sum_a (p_a F_a(q)+F_a(q) p_a)",
+  "sparse_quadratic_terms_after_combination": 734176,
+  "maximum_abs_generator_coefficient": 2.5147527408514407,
+  "uses_global_positive_rescaling": false,
+  "uses_coherent_state_mean_field_factorization": false,
+  "source_is_reality_reduced_full_cube": true,
+  "full_lattice_equivalent_helicity_triads": 65856,
+  "verification": {
+    "generic_global_state_reconstruction_relative_errors": [
+      1.2239568912235026e-15,
+      1.1478266125709582e-15,
+      1.2920964810000398e-15
+    ],
+    "maximum_global_reconstruction_relative_error": 1.2920964810000398e-15,
+    "divergence_linear_coefficient_max_abs": 0.0,
+    "energy_commutator_polynomial": {
+      "term_count": 251776,
+      "max_abs": 1.1587952819525071e-15,
+      "l2": 9.87314446989386e-14,
+      "above_tolerance": 0
+    },
+    "helicity_commutator_polynomial": {
+      "term_count": 251776,
+      "max_abs": 5.329070518200751e-15,
+      "l2": 4.253376676127094e-13,
+      "above_tolerance": 0
+    },
+    "tolerance": 1e-10
+  },
+  "operator_statement": "With [q_a,p_b]=i delta_ab, the Heisenberg identity i[H,q_a]=F_a(q) holds term by term for the assembled 342-node coefficient graph.",
+  "first_moment_boundary": "For a general state, d<q_a>/dt=<F_a(q)>, and this expression generally differs from F_a(<q>). The exact embedding concerns operator and distribution evolution; nonlinear first moments retain covariance dependence for arbitrary density operators."
+}

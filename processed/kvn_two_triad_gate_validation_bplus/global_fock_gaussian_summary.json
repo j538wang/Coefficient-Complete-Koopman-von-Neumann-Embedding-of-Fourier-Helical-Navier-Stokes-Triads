@@ -1,0 +1,52 @@
+{
+  "network": {
+    "geometry_id": 745,
+    "K": "(3, 0, -2)",
+    "P": "(0, -2, -3)",
+    "Q": "(3, 2, 1)",
+    "helicity_weights": [
+      3.605551275463989,
+      -3.605551275463989,
+      3.7416573867739413,
+      -3.7416573867739413
+    ],
+    "plus_coefficients": [
+      1.6294643037185843,
+      -0.030185620157678034,
+      -1.5992786835609065
+    ],
+    "minus_coefficients": [
+      0.030185620157678034,
+      -1.6294643037185843,
+      1.599278683560906
+    ],
+    "energy_identity_residuals": [
+      2.220446049250313e-16,
+      2.220446049250313e-16
+    ],
+    "helicity_identity_residuals": [
+      7.041534232101977e-16,
+      9.57476249211892e-16
+    ]
+  },
+  "basis": {
+    "type": "four-mode global total-number Fock truncation",
+    "selected_total_number_cutoff": 16,
+    "selected_hilbert_dimension": 4845,
+    "passive_maps_preserve_truncated_space": true
+  },
+  "compilation": {
+    "gaussian_map": "one local phase rotation and two passive Givens beam-splitter rotations",
+    "ideal_map_squeezing_operations_per_factor": 0,
+    "polarization_factors_per_monomial": 4
+  },
+  "success_criteria": {
+    "all_24_passive_gaussian_maps_below_1e-10": true,
+    "all_24_single_factor_compilations_below_1e-10": true,
+    "all_strang_sequences_physical_to_collective_below_1e-10": true,
+    "intermediate_norm_error_below_1e-10": true,
+    "selected_total_boundary_probability_below_1e-4": true
+  },
+  "overall_restricted_gaussian_compilation_success": true,
+  "claim_boundary": "The audit validates explicit passive Gaussian map--single-mode-cubic--unmap compilation on the four-coordinate real invariant restriction. It separates Gaussian-map correctness from cubic and polarization boundary effects. The complete eight-coordinate network and physical gate imperfections remain open."
+}

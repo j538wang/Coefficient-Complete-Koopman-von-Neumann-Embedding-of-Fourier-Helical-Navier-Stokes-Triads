@@ -1,0 +1,45 @@
+{
+  "input_csv": "processed/full_kmax3_unique/phase_gauge_ensemble.csv",
+  "tolerance": 1e-10,
+  "total_input_rows": 32928,
+  "local_pass_rows": 30000,
+  "local_singular_rows": 2880,
+  "local_inactive_rows": 48,
+  "global_nodes": 342,
+  "global_constraints": 60000,
+  "connected_components": 1,
+  "component_sizes": [
+    342
+  ],
+  "least_squares": {
+    "rank": 341,
+    "expected_rank": 341,
+    "free_unknowns": 341,
+    "full_column_rank_after_gauge_fixing": true,
+    "b_l2": 175.2527173527601,
+    "residual_l2": 168.48470570793575,
+    "residual_relative_l2": 0.9613814168073568,
+    "residual_rms": 0.6878359307457184,
+    "residual_max_abs": 2.284827282265555,
+    "constraints_above_tolerance": 60000,
+    "smallest_singular_value": 1.5792903953822353,
+    "largest_singular_value": 29.327819289539075,
+    "matrix_condition_after_gauge_fixing": 18.570251155387336
+  },
+  "spanning_cycle_audit": {
+    "spanning_tree_edges": 341,
+    "non_tree_edges": 59659,
+    "cycle_closure_max_abs": 4.260643367897455,
+    "cycle_closures_above_tolerance": 59402
+  },
+  "parallel_pair_audit": {
+    "unique_node_pairs": 32208,
+    "node_pairs_with_multiple_constraints": 18168,
+    "inconsistent_parallel_node_pairs": 18168,
+    "maximum_parallel_mismatch": 3.98864093449443,
+    "minimum_inconsistent_cycle_length": 2
+  },
+  "globally_compatible": false,
+  "decision": "no_go_for_one_positive_scale_per_shared_mode",
+  "claim_boundary": "Incompatibility rules out a global positive diagonal encoding with one bosonic amplitude scale per shared Fourier--helicity mode. It does not rule out auxiliary modes, non-diagonal encodings, channels, or KvN dilations."
+}

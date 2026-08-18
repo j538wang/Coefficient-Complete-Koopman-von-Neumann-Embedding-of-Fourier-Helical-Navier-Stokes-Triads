@@ -266,6 +266,12 @@ def main() -> None:
     parser.add_argument("--tol", type=float, default=1e-10)
     parser.add_argument("--drop-tol", type=float, default=1e-14)
     parser.add_argument("--expected-active", type=int, default=6388)
+    parser.add_argument("--expected-nodes", type=int, default=252)
+    parser.add_argument(
+        "--reality-reduced-full-cube",
+        action="store_true",
+        help="mark the input as one representative of each full-cube reality pair",
+    )
     args = parser.parse_args()
 
     df = pd.read_csv(args.csv)
@@ -279,8 +285,10 @@ def main() -> None:
             node_set.add(mode_node(parse_vector(str(row[vector_name])), int(row[helicity_name])))
     nodes = sorted(node_set)
     node_index = {node: index for index, node in enumerate(nodes)}
-    if len(nodes) != 252:
-        raise RuntimeError(f"expected 252 shared complex nodes, found {len(nodes)}")
+    if len(nodes) != args.expected_nodes:
+        raise RuntimeError(
+            f"expected {args.expected_nodes} shared complex nodes, found {len(nodes)}"
+        )
 
     terms = assemble_terms(active, node_index, args.drop_tol)
     real_dimension = 2 * len(nodes)
@@ -307,6 +315,7 @@ def main() -> None:
 
     summary = {
         "input_csv": str(args.csv.resolve()),
+        "source_total_rows": int(len(df)),
         "source_active_triads": int(len(active)),
         "source_nonsingular_triads": int(np.sum(active["rescale_status"] == "pass")),
         "source_singular_triads": int(np.sum(active["rescale_status"] == "singular")),
@@ -319,6 +328,10 @@ def main() -> None:
         "maximum_abs_generator_coefficient": float(max(abs(value) for value in terms.values())),
         "uses_global_positive_rescaling": False,
         "uses_coherent_state_mean_field_factorization": False,
+        "source_is_reality_reduced_full_cube": bool(args.reality_reduced_full_cube),
+        "full_lattice_equivalent_helicity_triads": (
+            int(2 * len(df)) if args.reality_reduced_full_cube else None
+        ),
         "verification": {
             "generic_global_state_reconstruction_relative_errors": reconstruction_errors,
             "maximum_global_reconstruction_relative_error": max(reconstruction_errors),
@@ -329,7 +342,7 @@ def main() -> None:
         },
         "operator_statement": (
             "With [q_a,p_b]=i delta_ab, the Heisenberg identity i[H,q_a]=F_a(q) "
-            "holds term by term for the assembled 252-node coefficient graph."
+            f"holds term by term for the assembled {len(nodes)}-node coefficient graph."
         ),
         "first_moment_boundary": (
             "For a general state, d<q_a>/dt=<F_a(q)> rather than F_a(<q>). "

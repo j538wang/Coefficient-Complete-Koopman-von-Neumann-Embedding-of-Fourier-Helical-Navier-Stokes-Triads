@@ -28,6 +28,11 @@ def parse_diagnostics(path: Path) -> dict[str, str]:
     return values
 
 
+def load_csv(relative: str) -> list[dict[str, str]]:
+    with (ROOT / relative).open(newline="", encoding="utf-8-sig") as handle:
+        return list(csv.DictReader(handle))
+
+
 def verify_manifest() -> int:
     manifest = ROOT / "MANIFEST.csv"
     if not manifest.exists():
@@ -72,11 +77,80 @@ def main() -> None:
     close(gate["trotter_observed_order_from_last_three_points"], 2.0043358056518863)
     assert gate["overall_gate_level_validation_success"] is True
 
+    dedup = load_json("processed/full_kmax3_unique/deduplication_summary.json")
+    assert dedup["source_created_mode_geometries"] == 12348
+    assert dedup["created_mode_orientations_per_reality_reduced_class"] == 3
+    assert dedup["unique_reality_reduced_closed_triad_geometries"] == 4116
+    assert dedup["retained_helicity_resolved_rows"] == 32928
+    assert dedup["status_counts"] == {"active": 32880, "inactive": 48}
+    assert dedup["positive_rescaling_status_counts"] == {
+        "pass": 30000,
+        "singular": 2880,
+        "inactive": 48,
+    }
+
+    full_scaling = load_json("processed/full_kmax3_global_scaling_audit/global_compatibility_summary.json")
+    assert full_scaling["total_input_rows"] == 32928
+    assert full_scaling["local_pass_rows"] == 30000
+    assert full_scaling["global_nodes"] == 342
+    assert full_scaling["global_constraints"] == 60000
+    assert full_scaling["least_squares"]["rank"] == 341
+    close(full_scaling["least_squares"]["residual_relative_l2"], 0.9613814168073568)
+    assert full_scaling["spanning_cycle_audit"]["cycle_closures_above_tolerance"] == 59402
+    assert full_scaling["parallel_pair_audit"]["inconsistent_parallel_node_pairs"] == 18168
+    assert full_scaling["globally_compatible"] is False
+
+    full_kvn = load_json("processed/full_kmax3_kvn_graph_audit/global_kvn_summary.json")
+    assert full_kvn["source_total_rows"] == 32928
+    assert full_kvn["source_active_triads"] == 32880
+    assert full_kvn["shared_complex_fourier_helicity_nodes"] == 342
+    assert full_kvn["real_kvn_coordinate_count"] == 684
+    assert full_kvn["sparse_quadratic_terms_after_combination"] == 734176
+    assert full_kvn["full_lattice_equivalent_helicity_triads"] == 65856
+    close(full_kvn["verification"]["maximum_global_reconstruction_relative_error"], 1.2920964810000398e-15)
+    close(full_kvn["verification"]["energy_commutator_polynomial"]["max_abs"], 1.1587952819525071e-15)
+    close(full_kvn["verification"]["helicity_commutator_polynomial"]["max_abs"], 5.329070518200751e-15)
+
+    local_bplus = load_json("processed/kvn_two_triad_gate_validation_bplus/gate_validation_summary.json")
+    assert local_bplus["representation"]["gaussian_conjugations_instantiated"] is True
+    assert local_bplus["overall_local_product_cutoff_stress_audit_success"] is True
+    assert local_bplus["diagnostic_thresholds"]["selected_cutoff_10_eight_step_compilation_residual_below_1e-3"] is False
+
+    global_bplus = load_json("processed/kvn_two_triad_gate_validation_bplus/global_fock_gaussian_summary.json")
+    assert global_bplus["basis"]["selected_total_number_cutoff"] == 16
+    assert global_bplus["basis"]["selected_hilbert_dimension"] == 4845
+    assert global_bplus["basis"]["passive_maps_preserve_truncated_space"] is True
+    assert global_bplus["overall_restricted_gaussian_compilation_success"] is True
+
+    cutoff_rows = {int(row["total_number_cutoff"]): row for row in load_csv(
+        "processed/kvn_two_triad_gate_validation_bplus/global_fock_gaussian_cutoff_scan.csv"
+    )}
+    close(cutoff_rows[16]["maximum_gaussian_map_action_relative_residual"], 3.175706191044993e-15)
+    close(cutoff_rows[16]["physical_to_collective_one_step_state_l2_residual"], 2.8279095998277067e-14)
+    close(cutoff_rows[16]["maximum_intermediate_total_boundary_probability"], 6.834695132964088e-05)
+
+    strang_rows = {int(row["strang_steps"]): row for row in load_csv(
+        "processed/kvn_two_triad_gate_validation_bplus/global_fock_gaussian_strang_scan.csv"
+    )}
+    assert int(strang_rows[1]["single_mode_cubic_phase_primitive_count"]) == 44
+    assert int(strang_rows[8]["single_mode_cubic_phase_primitive_count"]) == 324
+    assert int(strang_rows[8]["gaussian_phase_rotation_count"]) == 648
+    assert int(strang_rows[8]["gaussian_beam_splitter_rotation_count"]) == 1296
+    close(strang_rows[8]["physical_to_collective_state_l2_residual"], 2.010669495086239e-13)
+    close(strang_rows[8]["maximum_abs_single_mode_cubic_strength"], 0.0031751043335554855)
+    close(strang_rows[8]["total_abs_single_mode_cubic_strength"], 0.40641335469510215)
+
     resource = load_json("processed/full_spectral_resource_scaling/resource_scaling_summary.json")
     rows = {row["spectral_cutoff_K"]: row for row in resource["exact_rows"]}
     assert rows[1]["exact_noncollinear_unordered_triad_geometries"] == 44
     assert rows[3]["exact_noncollinear_unordered_triad_geometries"] == 8232
     assert rows[6]["exact_noncollinear_unordered_triad_geometries"] == 339900
+
+    resource_bplus = load_json("processed/full_spectral_resource_scaling_bplus/resource_scaling_summary.json")
+    close(resource_bplus["global_audit_calibration"]["observed_terms_per_full_lattice_helical_triad"], 11.148202137998057)
+    resource_bplus_rows = {row["spectral_cutoff_K"]: row for row in resource_bplus["exact_rows"]}
+    assert resource_bplus_rows[3]["direct_first_order_non_gaussian_cubic_phase_primitives_empirical_estimate"] == 2936704
+    close(resource_bplus_rows[3]["empirical_direct_to_structured_cubic_primitive_ratio"], 122.36266666666667)
 
     tgv = load_json("processed/tgv/shell_transfer/shell_helicity_summary.json")
     assert tgv["N"] == 128 and tgv["retained_modes"] == 5000

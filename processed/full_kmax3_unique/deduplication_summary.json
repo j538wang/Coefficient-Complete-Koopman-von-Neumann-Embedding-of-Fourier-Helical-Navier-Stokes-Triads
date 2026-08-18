@@ -1,0 +1,17 @@
+{
+  "source_csv": "processed/full_kmax3_ensemble/phase_gauge_ensemble.csv",
+  "source_created_mode_geometries": 12348,
+  "created_mode_orientations_per_reality_reduced_class": 3,
+  "unique_reality_reduced_closed_triad_geometries": 4116,
+  "retained_helicity_resolved_rows": 32928,
+  "status_counts": {
+    "active": 32880,
+    "inactive": 48
+  },
+  "positive_rescaling_status_counts": {
+    "pass": 30000,
+    "singular": 2880,
+    "inactive": 48
+  },
+  "selection_rule": "For each unordered closed triad {-K,P,Q}, identify its simultaneous sign reversal and retain the smallest source geometry_id among the three created-mode choices."
+}

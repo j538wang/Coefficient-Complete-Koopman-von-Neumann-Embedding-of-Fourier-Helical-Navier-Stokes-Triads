@@ -13,12 +13,15 @@ Hamiltonian is a sum of six mutually Hermitian cubic monomials
     H = sum_l c_l p_target(l) q_input1(l) q_input2(l).
 
 Each monomial is expanded into four collective cubic exponentials by the
-polarization identity for three commuting quadratures.  The script checks that
-collective-cubic sequence directly in a truncated Fock basis; it does not
-instantiate the Gaussian conjugations that would map each linear form to and
-from a physical single-mode cubic-phase primitive.  It also compares direct
-Hamiltonian evolution with a symmetric product-formula sequence and compares
-normalized first moments with the corresponding classical trajectory.
+polarization identity for three commuting quadratures.  For every collective
+linear form the script constructs an explicit passive Gaussian map: a local
+phase rotation converts the target momentum into a position quadrature and two
+Givens beam-splitter rotations align the normalized three-mode quadrature with
+the target mode.  It then validates the resulting map--single-mode-cubic--unmap
+sequence in the truncated Fock basis, including intermediate boundary
+occupation.  The calculation also compares direct Hamiltonian evolution with
+a symmetric product-formula sequence and compares normalized first moments
+with the corresponding classical trajectory.
 """
 
 from __future__ import annotations
@@ -29,7 +32,7 @@ import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Sequence, Tuple
+from typing import Dict, Iterable, List, MutableMapping, Sequence, Tuple
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -145,14 +148,19 @@ def embedded(single_mode: csc_matrix, mode: int, cutoff: int, modes: int = 4) ->
     return kron_all([single_mode if index == mode else identity for index in range(modes)])
 
 
-def fock_operators(cutoff: int) -> Tuple[List[csc_matrix], List[csc_matrix]]:
+def fock_operators(
+    cutoff: int,
+) -> Tuple[List[csc_matrix], List[csc_matrix], List[csc_matrix], List[csc_matrix]]:
     a = annihilation(cutoff).astype(complex)
     adag = a.getH()
     q_single = (a + adag) / math.sqrt(2.0)
     p_single = (a - adag) / (1j * math.sqrt(2.0))
+    number_single = adag @ a
+    a_ops = [embedded(a, mode, cutoff) for mode in range(4)]
     q_ops = [embedded(q_single, mode, cutoff) for mode in range(4)]
     p_ops = [embedded(p_single, mode, cutoff) for mode in range(4)]
-    return q_ops, p_ops
+    number_ops = [embedded(number_single, mode, cutoff) for mode in range(4)]
+    return a_ops, q_ops, p_ops, number_ops
 
 
 def coherent_state(alpha: float, cutoff: int) -> np.ndarray:
@@ -169,6 +177,99 @@ def product_coherent(q_means: np.ndarray, cutoff: int) -> np.ndarray:
     for state in states[1:]:
         result = np.kron(result, state)
     return result / np.linalg.norm(result)
+
+
+POLARIZATION_SIGNS: Tuple[Tuple[int, int, int], ...] = (
+    (1, 1, 1),
+    (1, -1, -1),
+    (-1, 1, -1),
+    (-1, -1, 1),
+)
+
+
+def maximum_edge_probability(state: np.ndarray, cutoff: int) -> float:
+    probability = np.abs(state.reshape((cutoff,) * 4)) ** 2
+    edge = []
+    for mode in range(4):
+        axes = tuple(axis for axis in range(4) if axis != mode)
+        marginal = probability.sum(axis=axes)
+        edge.append(float(np.sum(marginal[max(0, cutoff - 2):])))
+    return float(max(edge))
+
+
+def beam_splitter_generator(
+    mode_a: int,
+    mode_b: int,
+    a_ops: Sequence[csc_matrix],
+    cache: MutableMapping[Tuple[int, int], csc_matrix],
+) -> csc_matrix:
+    key = (mode_a, mode_b)
+    if key not in cache:
+        generator = a_ops[mode_a].getH() @ a_ops[mode_b]
+        generator -= a_ops[mode_b].getH() @ a_ops[mode_a]
+        cache[key] = generator.tocsc()
+    return cache[key]
+
+
+def gaussian_alignment_angles(signs: Sequence[int]) -> Tuple[float, float]:
+    vector = np.asarray(signs, dtype=float) / math.sqrt(3.0)
+    theta_2 = math.asin(float(vector[2]))
+    theta_1 = math.atan2(float(vector[1]), float(vector[0]))
+    reconstructed = np.array(
+        [
+            math.cos(theta_2) * math.cos(theta_1),
+            math.cos(theta_2) * math.sin(theta_1),
+            math.sin(theta_2),
+        ]
+    )
+    if np.linalg.norm(reconstructed - vector) > 1e-14:
+        raise RuntimeError("failed to construct the passive Gaussian alignment")
+    return theta_1, theta_2
+
+
+def apply_gaussian_map(
+    state: np.ndarray,
+    term: CubicTerm,
+    signs: Sequence[int],
+    a_ops: Sequence[csc_matrix],
+    number_ops: Sequence[csc_matrix],
+    beam_cache: MutableMapping[Tuple[int, int], csc_matrix],
+    inverse: bool = False,
+    tracker=None,
+) -> np.ndarray:
+    """Apply G or G^dagger with G^dagger q_target G=L/sqrt(3)."""
+
+    theta_1, theta_2 = gaussian_alignment_angles(signs)
+    mode_a, mode_b, mode_c = term.target, term.input_1, term.input_2
+    generator_ab = beam_splitter_generator(mode_a, mode_b, a_ops, beam_cache)
+    generator_ac = beam_splitter_generator(mode_a, mode_c, a_ops, beam_cache)
+
+    if inverse:
+        gates = (
+            (theta_2 * -1.0, generator_ac, "beam_ac_inverse", False),
+            (theta_1 * -1.0, generator_ab, "beam_ab_inverse", False),
+            (math.pi / 2.0, number_ops[mode_a], "phase_inverse", True),
+        )
+    else:
+        gates = (
+            (-math.pi / 2.0, number_ops[mode_a], "phase", True),
+            (theta_1, generator_ab, "beam_ab", False),
+            (theta_2, generator_ac, "beam_ac", False),
+        )
+
+    for parameter, generator, label, phase_gate in gates:
+        exponent = 1j * parameter * generator if phase_gate else parameter * generator
+        state = expm_multiply(exponent, state)
+        if tracker is not None:
+            tracker(label, state)
+    return state
+
+
+def phase_aligned_state_residual(reference: np.ndarray, candidate: np.ndarray) -> float:
+    overlap = np.vdot(reference, candidate)
+    if abs(overlap) > 0:
+        candidate = candidate * np.exp(-1j * np.angle(overlap))
+    return float(np.linalg.norm(reference - candidate))
 
 
 def hamiltonian_terms(
@@ -193,18 +294,12 @@ def state_observables(
 ) -> Dict[str, object]:
     means = np.array([expectation(state, q).real for q in q_ops], dtype=float)
     second = np.array([expectation(state, q @ q).real for q in q_ops], dtype=float)
-    probability = np.abs(state.reshape((cutoff,) * 4)) ** 2
-    edge = []
-    for mode in range(4):
-        axes = tuple(axis for axis in range(4) if axis != mode)
-        marginal = probability.sum(axis=axes)
-        edge.append(float(np.sum(marginal[max(0, cutoff - 2):])))
     return {
         "q_means": means,
         "q_second": second,
         "energy": float(0.5 * np.sum(second)),
         "helicity": float(0.5 * np.dot(helicity_weights, second)),
-        "maximum_edge_probability_last_two_levels": float(max(edge)),
+        "maximum_edge_probability_last_two_levels": maximum_edge_probability(state, cutoff),
         "norm": float(np.linalg.norm(state)),
     }
 
@@ -265,7 +360,7 @@ def polarization_gate_check(
     y = q_ops[term.input_1]
     z = q_ops[term.input_2]
     xyz = x @ y @ z
-    linear_forms = [x + y + z, x - y - z, -x + y - z, -x - y + z]
+    linear_forms = [sx * x + sy * y + sz * z for sx, sy, sz in POLARIZATION_SIGNS]
 
     lhs = xyz @ state
     rhs = sum((linear @ (linear @ (linear @ state)) for linear in linear_forms)) / 24.0
@@ -303,6 +398,231 @@ def polarization_gate_check(
     }
 
 
+def gaussian_factor_check(
+    term: CubicTerm,
+    signs: Sequence[int],
+    q_ops: Sequence[csc_matrix],
+    p_ops: Sequence[csc_matrix],
+    a_ops: Sequence[csc_matrix],
+    number_ops: Sequence[csc_matrix],
+    state: np.ndarray,
+    theta: float,
+    cutoff: int,
+    beam_cache: MutableMapping[Tuple[int, int], csc_matrix],
+    cube_cache: MutableMapping[int, csc_matrix],
+) -> Dict[str, object]:
+    x = p_ops[term.target]
+    y = q_ops[term.input_1]
+    z = q_ops[term.input_2]
+    linear = signs[0] * x + signs[1] * y + signs[2] * z
+    norm_l = math.sqrt(float(sum(sign * sign for sign in signs)))
+
+    mapped_state = apply_gaussian_map(
+        state, term, signs, a_ops, number_ops, beam_cache, inverse=False
+    )
+    mapped_action = q_ops[term.target] @ mapped_state
+    mapped_action = apply_gaussian_map(
+        mapped_action, term, signs, a_ops, number_ops, beam_cache, inverse=True
+    )
+    reference_action = (linear @ state) / norm_l
+    map_action_residual = float(
+        np.linalg.norm(mapped_action - reference_action)
+        / (np.linalg.norm(reference_action) + 1e-300)
+    )
+
+    collective_cube = (linear @ linear @ linear).tocsc()
+    collective_strength = theta * term.coefficient / 24.0
+    direct = expm_multiply(-1j * collective_strength * collective_cube, state)
+
+    trace: List[Tuple[str, float, float]] = []
+
+    def tracker(label: str, intermediate: np.ndarray) -> None:
+        trace.append(
+            (
+                label,
+                maximum_edge_probability(intermediate, cutoff),
+                abs(float(np.linalg.norm(intermediate)) - 1.0),
+            )
+        )
+
+    compiled = apply_gaussian_map(
+        state,
+        term,
+        signs,
+        a_ops,
+        number_ops,
+        beam_cache,
+        inverse=False,
+        tracker=tracker,
+    )
+    if term.target not in cube_cache:
+        q_target = q_ops[term.target]
+        cube_cache[term.target] = (q_target @ q_target @ q_target).tocsc()
+    single_mode_strength = collective_strength * norm_l**3
+    compiled = expm_multiply(
+        -1j * single_mode_strength * cube_cache[term.target], compiled
+    )
+    tracker("single_mode_cubic", compiled)
+    compiled = apply_gaussian_map(
+        compiled,
+        term,
+        signs,
+        a_ops,
+        number_ops,
+        beam_cache,
+        inverse=True,
+        tracker=tracker,
+    )
+
+    infidelity = float(max(0.0, 1.0 - abs(np.vdot(direct, compiled)) ** 2))
+    return {
+        "term": term.label,
+        "sign_x": int(signs[0]),
+        "sign_y": int(signs[1]),
+        "sign_z": int(signs[2]),
+        "linear_form_norm": norm_l,
+        "collective_exponent_coefficient": collective_strength,
+        "single_mode_cubic_strength": single_mode_strength,
+        "gaussian_map_action_relative_residual": map_action_residual,
+        "single_factor_state_l2_residual": phase_aligned_state_residual(direct, compiled),
+        "single_factor_state_infidelity": infidelity,
+        "maximum_intermediate_edge_probability_last_two_levels": max(
+            value[1] for value in trace
+        ),
+        "maximum_intermediate_norm_error": max(value[2] for value in trace),
+        "phase_rotations_including_inverse": 2,
+        "beam_splitter_rotations_including_inverse": 4,
+        "single_mode_cubic_phase_primitives": 1,
+        "ideal_map_squeezing_operations": 0,
+    }
+
+
+def strang_schedule(term_count: int, final_time: float, steps: int) -> List[Tuple[int, float]]:
+    dt = final_time / steps
+    schedule: List[Tuple[int, float]] = []
+    for _ in range(steps):
+        raw = (
+            [(index, 0.5 * dt) for index in range(term_count - 1)]
+            + [(term_count - 1, dt)]
+            + [(index, 0.5 * dt) for index in reversed(range(term_count - 1))]
+        )
+        for index, theta in raw:
+            if schedule and schedule[-1][0] == index:
+                previous_index, previous_theta = schedule[-1]
+                schedule[-1] = (previous_index, previous_theta + theta)
+            else:
+                schedule.append((index, theta))
+    return schedule
+
+
+def apply_gaussian_compiled_monomial(
+    state: np.ndarray,
+    term: CubicTerm,
+    q_ops: Sequence[csc_matrix],
+    a_ops: Sequence[csc_matrix],
+    number_ops: Sequence[csc_matrix],
+    theta: float,
+    cutoff: int,
+    beam_cache: MutableMapping[Tuple[int, int], csc_matrix],
+    cube_cache: MutableMapping[int, csc_matrix],
+    trace: List[Tuple[str, float, float]],
+) -> np.ndarray:
+    norm_l = math.sqrt(3.0)
+
+    def tracker(label: str, intermediate: np.ndarray) -> None:
+        trace.append(
+            (
+                label,
+                maximum_edge_probability(intermediate, cutoff),
+                abs(float(np.linalg.norm(intermediate)) - 1.0),
+            )
+        )
+
+    if term.target not in cube_cache:
+        q_target = q_ops[term.target]
+        cube_cache[term.target] = (q_target @ q_target @ q_target).tocsc()
+    for signs in POLARIZATION_SIGNS:
+        state = apply_gaussian_map(
+            state,
+            term,
+            signs,
+            a_ops,
+            number_ops,
+            beam_cache,
+            inverse=False,
+            tracker=tracker,
+        )
+        strength = theta * term.coefficient * norm_l**3 / 24.0
+        state = expm_multiply(-1j * strength * cube_cache[term.target], state)
+        tracker("single_mode_cubic", state)
+        state = apply_gaussian_map(
+            state,
+            term,
+            signs,
+            a_ops,
+            number_ops,
+            beam_cache,
+            inverse=True,
+            tracker=tracker,
+        )
+    return state
+
+
+def gaussian_compiled_evolution(
+    initial_state: np.ndarray,
+    terms: Sequence[CubicTerm],
+    q_ops: Sequence[csc_matrix],
+    a_ops: Sequence[csc_matrix],
+    number_ops: Sequence[csc_matrix],
+    final_time: float,
+    steps: int,
+    cutoff: int,
+) -> Tuple[np.ndarray, Dict[str, float]]:
+    state = initial_state.copy()
+    trace: List[Tuple[str, float, float]] = [
+        (
+            "initial",
+            maximum_edge_probability(state, cutoff),
+            abs(float(np.linalg.norm(state)) - 1.0),
+        )
+    ]
+    beam_cache: Dict[Tuple[int, int], csc_matrix] = {}
+    cube_cache: Dict[int, csc_matrix] = {}
+    schedule = strang_schedule(len(terms), final_time, steps)
+    strengths: List[float] = []
+    for index, theta in schedule:
+        term = terms[index]
+        strengths.extend(
+            [abs(theta * term.coefficient * math.sqrt(3.0) ** 3 / 24.0)] * 4
+        )
+        state = apply_gaussian_compiled_monomial(
+            state,
+            term,
+            q_ops,
+            a_ops,
+            number_ops,
+            theta,
+            cutoff,
+            beam_cache,
+            cube_cache,
+            trace,
+        )
+    primitive_count = 4 * len(schedule)
+    return state, {
+        "optimized_monomial_exponential_count": len(schedule),
+        "single_mode_cubic_phase_primitive_count": primitive_count,
+        "gaussian_phase_rotation_count": 2 * primitive_count,
+        "gaussian_beam_splitter_rotation_count": 4 * primitive_count,
+        "ideal_map_squeezing_operation_count": 0,
+        "maximum_abs_single_mode_cubic_strength": float(max(strengths)),
+        "total_abs_single_mode_cubic_strength": float(sum(strengths)),
+        "maximum_intermediate_edge_probability_last_two_levels": float(
+            max(value[1] for value in trace)
+        ),
+        "maximum_intermediate_norm_error": float(max(value[2] for value in trace)),
+    }
+
+
 def apply_compiled_monomial(
     state: np.ndarray,
     term: CubicTerm,
@@ -314,7 +634,8 @@ def apply_compiled_monomial(
     x = p_ops[term.target]
     y = q_ops[term.input_1]
     z = q_ops[term.input_2]
-    for linear in (x + y + z, x - y - z, -x + y - z, -x - y + z):
+    for sx, sy, sz in POLARIZATION_SIGNS:
+        linear = sx * x + sy * y + sz * z
         cube = (linear @ linear @ linear).tocsc()
         state = expm_multiply(-1j * theta * term.coefficient * cube / 24.0, state)
     return state
@@ -345,7 +666,7 @@ def run_case(
     terms: Sequence[CubicTerm],
     helicity_weights: np.ndarray,
 ) -> Tuple[Dict[str, object], Dict[str, object]]:
-    q_ops, p_ops = fock_operators(cutoff)
+    a_ops, q_ops, p_ops, number_ops = fock_operators(cutoff)
     h_terms = hamiltonian_terms(terms, q_ops, p_ops)
     hamiltonian = sum(h_terms[1:], h_terms[0]).tocsc()
     initial_state = product_coherent(amplitude * x0, cutoff)
@@ -384,8 +705,10 @@ def run_case(
         ),
     }
     payload: Dict[str, object] = {
+        "a_ops": a_ops,
         "q_ops": q_ops,
         "p_ops": p_ops,
+        "number_ops": number_ops,
         "h_terms": h_terms,
         "hamiltonian": hamiltonian,
         "initial_state": initial_state,
@@ -419,6 +742,7 @@ def plot_validation_figure(
     amplitude_rows: Sequence[Dict[str, object]],
     cutoff_rows: Sequence[Dict[str, object]],
     trotter_rows: Sequence[Dict[str, object]],
+    gaussian_cutoff_rows: Sequence[Dict[str, object]],
     out: Path,
 ) -> None:
     try:
@@ -426,11 +750,12 @@ def plot_validation_figure(
     except (ImportError, PermissionError):
         return
 
-    fig = plt.figure(figsize=(9.0, 6.4))
-    grid = fig.add_gridspec(2, 2, width_ratios=(1.0, 1.15))
+    fig = plt.figure(figsize=(9.0, 7.0))
+    grid = fig.add_gridspec(2, 2)
     ax_amp = fig.add_subplot(grid[0, 0])
     ax_cut = fig.add_subplot(grid[1, 0])
-    ax_strang = fig.add_subplot(grid[:, 1])
+    ax_strang = fig.add_subplot(grid[0, 1])
+    ax_gaussian = fig.add_subplot(grid[1, 1])
     amplitude_values = [row["amplitude_scale"] for row in amplitude_rows]
     amplitude_errors = [
         row["normalized_first_moment_trajectory_relative_l2_error"]
@@ -488,13 +813,59 @@ def plot_validation_figure(
         [row["strang_steps"] for row in trotter_rows],
         [row["first_moment_relative_l2_error_to_direct"] for row in trotter_rows],
         "o-",
+        label="collective sequence",
+    )
+    ax_strang.loglog(
+        [row["strang_steps"] for row in trotter_rows],
+        [row["physical_first_moment_relative_l2_error_to_direct"] for row in trotter_rows],
+        "s--",
+        label="map--cubic--unmap",
     )
     ax_strang.set_xscale("log", base=2)
     ax_strang.set_xticks([1, 2, 4, 8])
     ax_strang.set_xticklabels(["1", "2", "4", "8"])
     ax_strang.set_xlabel(r"Strang steps $n_{\rm step}$")
     ax_strang.set_ylabel("sequence/direct mean error")
+    ax_strang.legend(frameon=False, fontsize=7)
     ax_strang.grid(True, which="both", alpha=0.3)
+
+    gaussian_cutoffs = [row["cutoff"] for row in gaussian_cutoff_rows]
+    ax_gaussian.semilogy(
+        gaussian_cutoffs,
+        [
+            max(float(row["maximum_single_factor_state_l2_residual"]), 1e-18)
+            for row in gaussian_cutoff_rows
+        ],
+        "o-",
+        label="single-factor residual",
+    )
+    ax_gaussian.semilogy(
+        gaussian_cutoffs,
+        [
+            max(float(row["physical_one_step_state_l2_residual"]), 1e-18)
+            for row in gaussian_cutoff_rows
+        ],
+        "s--",
+        label="one-step residual",
+    )
+    ax_gaussian_edge = ax_gaussian.twinx()
+    edge_line = ax_gaussian_edge.semilogy(
+        gaussian_cutoffs,
+        [
+            row["physical_one_step_maximum_intermediate_edge_probability_last_two_levels"]
+            for row in gaussian_cutoff_rows
+        ],
+        "^:",
+        color="tab:orange",
+        label="intermediate edge",
+    )
+    ax_gaussian.set_xlabel("Fock cutoff")
+    ax_gaussian.set_ylabel("compiled/direct residual")
+    ax_gaussian_edge.set_ylabel("intermediate edge", color="tab:orange")
+    ax_gaussian_edge.tick_params(axis="y", labelcolor="tab:orange")
+    handles, labels = ax_gaussian.get_legend_handles_labels()
+    ax_gaussian.legend(handles + edge_line, labels + ["intermediate edge"], frameon=False, fontsize=7)
+    ax_gaussian.grid(True, which="both", alpha=0.3)
     fig.tight_layout()
     fig.savefig(out / "two_triad_gate_validation.pdf", bbox_inches="tight")
     fig.savefig(out / "two_triad_gate_validation.png", dpi=220, bbox_inches="tight")
@@ -523,6 +894,7 @@ def main() -> None:
             read_numeric_csv(args.out / "amplitude_scan.csv"),
             read_numeric_csv(args.out / "cutoff_scan.csv"),
             read_numeric_csv(args.out / "strang_gate_scan.csv"),
+            read_numeric_csv(args.out / "gaussian_compilation_cutoff_scan.csv"),
             args.out,
         )
         print(json.dumps({"plot_only": True, "summary": str(args.out)}, indent=2))
@@ -575,6 +947,7 @@ def main() -> None:
 
     print("Running cutoff scan", flush=True)
     cutoff_rows: List[Dict[str, object]] = []
+    cutoff_payloads: Dict[int, Dict[str, object]] = {}
     for cutoff in (6, 8, args.selected_cutoff, 12, 14):
         row, payload = run_case(
             cutoff,
@@ -587,6 +960,7 @@ def main() -> None:
             helicity_weights,
         )
         cutoff_rows.append(row)
+        cutoff_payloads[cutoff] = payload
         print(
             f"  cutoff={cutoff}: trajectory={row['normalized_first_moment_trajectory_relative_l2_error']:.3e}, "
             f"edge={row['maximum_edge_probability_last_two_levels']:.3e}",
@@ -598,6 +972,7 @@ def main() -> None:
     if selected_payload is None:
         raise RuntimeError("selected validation payload was not generated")
 
+    final_time = args.tau_end / args.selected_amplitude
     print("Checking polarization-expanded collective cubics for all six monomials", flush=True)
     gate_compilation_rows = [
         polarization_gate_check(
@@ -605,14 +980,14 @@ def main() -> None:
             selected_payload["q_ops"],
             selected_payload["p_ops"],
             selected_payload["initial_state"],
-            theta=args.tau_end / args.selected_amplitude / 4.0,
+            theta=final_time / 4.0,
         )
         for term in terms
     ]
     direct_one_step = strang_evolution(
         selected_payload["initial_state"],
         selected_payload["h_terms"],
-        args.tau_end / args.selected_amplitude,
+        final_time,
         1,
     )
     compiled_one_step = compiled_strang_step(
@@ -620,7 +995,7 @@ def main() -> None:
         terms,
         selected_payload["q_ops"],
         selected_payload["p_ops"],
-        args.tau_end / args.selected_amplitude,
+        final_time,
     )
     compiled_overlap = abs(np.vdot(direct_one_step, compiled_one_step)) ** 2
     gate_compilation = {
@@ -649,6 +1024,154 @@ def main() -> None:
         "gaussian_conjugations_instantiated": False,
     }
 
+    print("Running passive Gaussian map--cubic--unmap cutoff audit", flush=True)
+    gaussian_cutoff_rows: List[Dict[str, object]] = []
+    gaussian_factor_rows: List[Dict[str, object]] = []
+    for cutoff in (6, 8, args.selected_cutoff, 12, 14):
+        payload = cutoff_payloads[cutoff]
+        beam_cache: Dict[Tuple[int, int], csc_matrix] = {}
+        cube_cache: Dict[int, csc_matrix] = {}
+        factor_rows = [
+            {
+                "cutoff": cutoff,
+                **gaussian_factor_check(
+                    term,
+                    signs,
+                    payload["q_ops"],
+                    payload["p_ops"],
+                    payload["a_ops"],
+                    payload["number_ops"],
+                    payload["initial_state"],
+                    theta=final_time / 4.0,
+                    cutoff=cutoff,
+                    beam_cache=beam_cache,
+                    cube_cache=cube_cache,
+                ),
+            }
+            for term in terms
+            for signs in POLARIZATION_SIGNS
+        ]
+        collective_one_step = compiled_strang_step(
+            payload["initial_state"],
+            terms,
+            payload["q_ops"],
+            payload["p_ops"],
+            final_time,
+        )
+        physical_one_step, physical_diagnostics = gaussian_compiled_evolution(
+            payload["initial_state"],
+            terms,
+            payload["q_ops"],
+            payload["a_ops"],
+            payload["number_ops"],
+            final_time,
+            1,
+            cutoff,
+        )
+        gaussian_row: Dict[str, object] = {
+            "cutoff": cutoff,
+            "hilbert_dimension": cutoff**4,
+            "maximum_gaussian_map_action_relative_residual": max(
+                row["gaussian_map_action_relative_residual"] for row in factor_rows
+            ),
+            "maximum_single_factor_state_l2_residual": max(
+                row["single_factor_state_l2_residual"] for row in factor_rows
+            ),
+            "maximum_single_factor_state_infidelity": max(
+                row["single_factor_state_infidelity"] for row in factor_rows
+            ),
+            "maximum_single_factor_intermediate_edge_probability_last_two_levels": max(
+                row["maximum_intermediate_edge_probability_last_two_levels"]
+                for row in factor_rows
+            ),
+            "physical_one_step_state_l2_residual": phase_aligned_state_residual(
+                collective_one_step, physical_one_step
+            ),
+            "physical_one_step_state_infidelity": float(
+                max(0.0, 1.0 - abs(np.vdot(collective_one_step, physical_one_step)) ** 2)
+            ),
+            "physical_one_step_maximum_intermediate_edge_probability_last_two_levels": physical_diagnostics[
+                "maximum_intermediate_edge_probability_last_two_levels"
+            ],
+            "physical_one_step_maximum_intermediate_norm_error": physical_diagnostics[
+                "maximum_intermediate_norm_error"
+            ],
+            "single_mode_cubic_phase_primitive_count": physical_diagnostics[
+                "single_mode_cubic_phase_primitive_count"
+            ],
+            "gaussian_phase_rotation_count": physical_diagnostics[
+                "gaussian_phase_rotation_count"
+            ],
+            "gaussian_beam_splitter_rotation_count": physical_diagnostics[
+                "gaussian_beam_splitter_rotation_count"
+            ],
+            "ideal_map_squeezing_operation_count": physical_diagnostics[
+                "ideal_map_squeezing_operation_count"
+            ],
+            "maximum_abs_single_mode_cubic_strength": physical_diagnostics[
+                "maximum_abs_single_mode_cubic_strength"
+            ],
+            "total_abs_single_mode_cubic_strength": physical_diagnostics[
+                "total_abs_single_mode_cubic_strength"
+            ],
+        }
+        gaussian_cutoff_rows.append(gaussian_row)
+        if cutoff == args.selected_cutoff:
+            gaussian_factor_rows = factor_rows
+        print(
+            f"  cutoff={cutoff}: factor={gaussian_row['maximum_single_factor_state_l2_residual']:.3e}, "
+            f"one-step={gaussian_row['physical_one_step_state_l2_residual']:.3e}, "
+            f"edge={gaussian_row['physical_one_step_maximum_intermediate_edge_probability_last_two_levels']:.3e}",
+            flush=True,
+        )
+
+    selected_gaussian = next(
+        row for row in gaussian_cutoff_rows if row["cutoff"] == args.selected_cutoff
+    )
+    gate_compilation.update(
+        {
+            "gaussian_conjugations_instantiated": True,
+            "gaussian_map_type": "local phase rotation plus two passive Givens beam-splitter rotations",
+            "ideal_map_squeezing_operations_per_factor": 0,
+            "maximum_gaussian_map_action_relative_residual": selected_gaussian[
+                "maximum_gaussian_map_action_relative_residual"
+            ],
+            "maximum_map_compiled_single_factor_state_l2_residual": selected_gaussian[
+                "maximum_single_factor_state_l2_residual"
+            ],
+            "map_compiled_full_one_step_state_l2_residual": selected_gaussian[
+                "physical_one_step_state_l2_residual"
+            ],
+            "map_compiled_full_one_step_state_infidelity": selected_gaussian[
+                "physical_one_step_state_infidelity"
+            ],
+            "map_compiled_full_one_step_maximum_intermediate_edge_probability": selected_gaussian[
+                "physical_one_step_maximum_intermediate_edge_probability_last_two_levels"
+            ],
+            "gaussian_phase_rotations_in_one_strang_step": selected_gaussian[
+                "gaussian_phase_rotation_count"
+            ],
+            "gaussian_beam_splitter_rotations_in_one_strang_step": selected_gaussian[
+                "gaussian_beam_splitter_rotation_count"
+            ],
+            "maximum_abs_single_mode_cubic_strength_in_one_strang_step": selected_gaussian[
+                "maximum_abs_single_mode_cubic_strength"
+            ],
+            "total_abs_single_mode_cubic_strength_in_one_strang_step": selected_gaussian[
+                "total_abs_single_mode_cubic_strength"
+            ],
+            "local_product_cutoff_14_map_compiled_single_factor_state_l2_residual": gaussian_cutoff_rows[-1][
+                "maximum_single_factor_state_l2_residual"
+            ],
+            "local_product_cutoff_14_map_compiled_one_step_state_l2_residual": gaussian_cutoff_rows[-1][
+                "physical_one_step_state_l2_residual"
+            ],
+            "local_product_cutoff_14_map_compiled_one_step_intermediate_edge_probability": gaussian_cutoff_rows[-1][
+                "physical_one_step_maximum_intermediate_edge_probability_last_two_levels"
+            ],
+        }
+    )
+
     print("Running symmetric product-formula scan", flush=True)
     trotter_rows: List[Dict[str, object]] = []
     direct_final = selected_payload["final_state"]
@@ -658,7 +1181,6 @@ def main() -> None:
         helicity_weights,
         args.selected_cutoff,
     )
-    final_time = args.tau_end / args.selected_amplitude
     for steps in (1, 2, 4, 8):
         trotter_state = strang_evolution(
             selected_payload["initial_state"], selected_payload["h_terms"], final_time, steps
@@ -666,6 +1188,22 @@ def main() -> None:
         overlap = abs(np.vdot(direct_final, trotter_state)) ** 2
         observation = state_observables(
             trotter_state, selected_payload["q_ops"], helicity_weights, args.selected_cutoff
+        )
+        physical_state, physical_diagnostics = gaussian_compiled_evolution(
+            selected_payload["initial_state"],
+            terms,
+            selected_payload["q_ops"],
+            selected_payload["a_ops"],
+            selected_payload["number_ops"],
+            final_time,
+            steps,
+            args.selected_cutoff,
+        )
+        physical_observation = state_observables(
+            physical_state,
+            selected_payload["q_ops"],
+            helicity_weights,
+            args.selected_cutoff,
         )
         direct_means = np.asarray(direct_observation["q_means"])
         trotter_means = np.asarray(observation["q_means"])
@@ -678,7 +1216,40 @@ def main() -> None:
                 np.linalg.norm(trotter_means - direct_means)
                 / (np.linalg.norm(direct_means) + 1e-300)
             ),
-            "optimized_non_gaussian_cubic_phase_primitive_count": 4 * optimized_monomial_exponentials,
+            "physical_first_moment_relative_l2_error_to_direct": float(
+                np.linalg.norm(np.asarray(physical_observation["q_means"]) - direct_means)
+                / (np.linalg.norm(direct_means) + 1e-300)
+            ),
+            "physical_compilation_state_l2_residual_to_collective_sequence": phase_aligned_state_residual(
+                trotter_state, physical_state
+            ),
+            "physical_compilation_state_infidelity_to_collective_sequence": float(
+                max(0.0, 1.0 - abs(np.vdot(trotter_state, physical_state)) ** 2)
+            ),
+            "optimized_non_gaussian_cubic_phase_primitive_count": physical_diagnostics[
+                "single_mode_cubic_phase_primitive_count"
+            ],
+            "gaussian_phase_rotation_count": physical_diagnostics[
+                "gaussian_phase_rotation_count"
+            ],
+            "gaussian_beam_splitter_rotation_count": physical_diagnostics[
+                "gaussian_beam_splitter_rotation_count"
+            ],
+            "ideal_map_squeezing_operation_count": physical_diagnostics[
+                "ideal_map_squeezing_operation_count"
+            ],
+            "maximum_abs_single_mode_cubic_strength": physical_diagnostics[
+                "maximum_abs_single_mode_cubic_strength"
+            ],
+            "total_abs_single_mode_cubic_strength": physical_diagnostics[
+                "total_abs_single_mode_cubic_strength"
+            ],
+            "physical_sequence_maximum_intermediate_edge_probability_last_two_levels": physical_diagnostics[
+                "maximum_intermediate_edge_probability_last_two_levels"
+            ],
+            "physical_sequence_maximum_intermediate_norm_error": physical_diagnostics[
+                "maximum_intermediate_norm_error"
+            ],
             "maximum_edge_probability_last_two_levels": observation[
                 "maximum_edge_probability_last_two_levels"
             ],
@@ -686,7 +1257,8 @@ def main() -> None:
         trotter_rows.append(row)
         print(
             f"  steps={steps}: infidelity={row['state_infidelity_to_direct']:.3e}, "
-            f"mean={row['first_moment_relative_l2_error_to_direct']:.3e}",
+            f"mean={row['first_moment_relative_l2_error_to_direct']:.3e}, "
+            f"physical/collective={row['physical_compilation_state_l2_residual_to_collective_sequence']:.3e}",
             flush=True,
         )
 
@@ -701,6 +1273,7 @@ def main() -> None:
 
     best_amplitude = amplitude_rows[-1]
     best_cutoff = cutoff_rows[-1]
+    best_gaussian_cutoff = gaussian_cutoff_rows[-1]
     success_criteria = {
         "coefficient_identities": max(
             max(metadata["energy_identity_residuals"]),
@@ -728,8 +1301,37 @@ def main() -> None:
             "normalized_first_moment_trajectory_relative_l2_error"
         ]
         < 5e-2,
+        "passive_gaussian_map_action_converges_with_cutoff": best_gaussian_cutoff[
+            "maximum_gaussian_map_action_relative_residual"
+        ]
+        < gaussian_cutoff_rows[0]["maximum_gaussian_map_action_relative_residual"],
+        "all_24_map_compiled_factors_converge_with_cutoff": best_gaussian_cutoff[
+            "maximum_single_factor_state_l2_residual"
+        ]
+        < gaussian_cutoff_rows[0]["maximum_single_factor_state_l2_residual"],
+        "map_compiled_one_step_converges_with_cutoff": best_gaussian_cutoff[
+            "physical_one_step_state_l2_residual"
+        ]
+        < gaussian_cutoff_rows[0]["physical_one_step_state_l2_residual"],
+        "compiled_sequence_norm_error_below_1e-10": max(
+            row["physical_sequence_maximum_intermediate_norm_error"] for row in trotter_rows
+        )
+        < 1e-10,
+        "local_product_cutoff_14_intermediate_edge_probability_below_1e-4": best_gaussian_cutoff[
+            "physical_one_step_maximum_intermediate_edge_probability_last_two_levels"
+        ]
+        < 1e-4,
     }
     overall_success = bool(all(success_criteria.values()))
+    diagnostic_thresholds = {
+        "selected_cutoff_10_eight_step_compilation_residual_below_1e-3": trotter_rows[-1][
+            "physical_compilation_state_l2_residual_to_collective_sequence"
+        ]
+        < 1e-3,
+        "selected_cutoff_10_eight_step_compilation_residual": trotter_rows[-1][
+            "physical_compilation_state_l2_residual_to_collective_sequence"
+        ],
+    }
 
     summary = {
         "network": metadata,
@@ -744,30 +1346,37 @@ def main() -> None:
             "collective_cubic_factors_per_monomial": 4,
             "first_order_non_gaussian_cubic_phase_primitives_per_layer": 4 * len(terms),
             "strang_non_gaussian_cubic_phase_primitives_per_unmerged_step": 4 * (2 * len(terms) - 1),
-            "gaussian_conjugations_instantiated": False,
+            "gaussian_conjugations_instantiated": True,
+            "gaussian_map_type": "passive local-phase plus two-Givens alignment",
+            "ideal_map_squeezing_operations_per_collective_factor": 0,
         },
         "gate_compilation": gate_compilation,
         "trotter_observed_order_from_last_three_points": trotter_order,
         "success_criteria": success_criteria,
-        "overall_gate_level_validation_success": overall_success,
+        "diagnostic_thresholds": diagnostic_thresholds,
+        "overall_local_product_cutoff_stress_audit_success": overall_success,
         "claim_boundary": (
-            "Success establishes a finite-Fock, finite-time collective-cubic validation on the "
-            "simultaneously real four-coordinate invariant restriction of the minimal two-triad "
-            "shared-mode network. The Gaussian map/unmap circuits needed for physical single-mode "
-            "cubic-phase primitives are not instantiated. This is not a validation of the complete "
-            "eight-real-coordinate complex network, a full spectral Navier--Stokes solver, or a "
-            "quantum-advantage result."
+            "This local tensor-product cutoff audit establishes monotone convergence of the "
+            "passive Gaussian compilation factors and records accumulated map truncation in the "
+            "complete sequence. At cutoff 10 the eight-step physical/collective state residual "
+            "remains above 1e-3 because independent local cutoffs are not invariant under passive "
+            "mode mixing. The companion global-total-number audit validates the Gaussian "
+            "compilation in a passive-invariant truncated space."
         ),
     }
 
     write_csv(args.out / "amplitude_scan.csv", amplitude_rows)
     write_csv(args.out / "cutoff_scan.csv", cutoff_rows)
     write_csv(args.out / "cubic_gate_compilation_by_monomial.csv", gate_compilation_rows)
+    write_csv(args.out / "gaussian_compilation_by_factor.csv", gaussian_factor_rows)
+    write_csv(args.out / "gaussian_compilation_cutoff_scan.csv", gaussian_cutoff_rows)
     write_csv(args.out / "strang_gate_scan.csv", trotter_rows)
     with (args.out / "gate_validation_summary.json").open("w", encoding="utf-8") as handle:
         json.dump(summary, handle, indent=2)
 
-    plot_validation_figure(amplitude_rows, cutoff_rows, trotter_rows, args.out)
+    plot_validation_figure(
+        amplitude_rows, cutoff_rows, trotter_rows, gaussian_cutoff_rows, args.out
+    )
 
     print(json.dumps({"overall_success": overall_success, "summary": str(args.out)}, indent=2))
     if not overall_success:

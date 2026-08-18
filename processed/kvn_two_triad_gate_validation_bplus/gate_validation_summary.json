@@ -1,0 +1,110 @@
+{
+  "network": {
+    "geometry_id": 745,
+    "K": "(3, 0, -2)",
+    "P": "(0, -2, -3)",
+    "Q": "(3, 2, 1)",
+    "helicity_weights": [
+      3.605551275463989,
+      -3.605551275463989,
+      3.7416573867739413,
+      -3.7416573867739413
+    ],
+    "plus_coefficients": [
+      1.6294643037185843,
+      -0.030185620157678034,
+      -1.5992786835609065
+    ],
+    "minus_coefficients": [
+      0.030185620157678034,
+      -1.6294643037185843,
+      1.599278683560906
+    ],
+    "energy_identity_residuals": [
+      2.220446049250313e-16,
+      2.220446049250313e-16
+    ],
+    "helicity_identity_residuals": [
+      7.041534232101977e-16,
+      9.57476249211892e-16
+    ],
+    "classical_initial_condition": [
+      0.8,
+      0.55,
+      0.35,
+      -0.3
+    ],
+    "dimensionless_final_time": 0.18,
+    "classical_energy_relative_drift": 2.9778969093408955e-13,
+    "classical_helicity_relative_drift": 2.0156051259738218e-13
+  },
+  "representation": {
+    "complete_complex_network_amplitudes": 4,
+    "complete_real_coordinates": 8,
+    "tested_real_invariant_coordinates": 4,
+    "shared_modes": [
+      "K",
+      "P"
+    ],
+    "triad_specific_modes": [
+      "Q+",
+      "Q-"
+    ],
+    "fluid_to_real_coordinate_normalization": "u=q/sqrt(2) on the simultaneously real invariant subspace",
+    "cubic_hamiltonian_monomials": 6,
+    "collective_cubic_factors_per_monomial": 4,
+    "first_order_non_gaussian_cubic_phase_primitives_per_layer": 24,
+    "strang_non_gaussian_cubic_phase_primitives_per_unmerged_step": 44,
+    "gaussian_conjugations_instantiated": true,
+    "gaussian_map_type": "passive local-phase plus two-Givens alignment",
+    "ideal_map_squeezing_operations_per_collective_factor": 0
+  },
+  "gate_compilation": {
+    "monomial_count": 6,
+    "maximum_generator_relative_residual": 2.8196939552929977e-16,
+    "maximum_linear_form_commutator_relative_residual": 2.3754971359412876e-16,
+    "maximum_compiled_monomial_state_l2_residual": 3.5419304133473893e-16,
+    "maximum_compiled_monomial_state_infidelity": 1.1102230246251565e-15,
+    "compiled_full_one_step_strang_state_l2_residual": 1.1744882504679328e-15,
+    "compiled_full_one_step_strang_state_infidelity": 0.0,
+    "collective_cubic_factors_per_monomial": 4,
+    "non_gaussian_cubic_phase_primitives_per_monomial": 4,
+    "non_gaussian_cubic_phase_primitives_in_one_strang_step": 44,
+    "gaussian_conjugations_instantiated": true,
+    "gaussian_map_type": "local phase rotation plus two passive Givens beam-splitter rotations",
+    "ideal_map_squeezing_operations_per_factor": 0,
+    "maximum_gaussian_map_action_relative_residual": 0.05700244283843694,
+    "maximum_map_compiled_single_factor_state_l2_residual": 0.007446160620981353,
+    "map_compiled_full_one_step_state_l2_residual": 0.08783757901527191,
+    "map_compiled_full_one_step_state_infidelity": 0.00770055828275773,
+    "map_compiled_full_one_step_maximum_intermediate_edge_probability": 0.004442492126587801,
+    "gaussian_phase_rotations_in_one_strang_step": 88,
+    "gaussian_beam_splitter_rotations_in_one_strang_step": 176,
+    "maximum_abs_single_mode_cubic_strength_in_one_strang_step": 0.024930287418504216,
+    "total_abs_single_mode_cubic_strength_in_one_strang_step": 0.40641335469510215,
+    "local_product_cutoff_14_map_compiled_single_factor_state_l2_residual": 0.0005257085975828764,
+    "local_product_cutoff_14_map_compiled_one_step_state_l2_residual": 0.007295615353114625,
+    "local_product_cutoff_14_map_compiled_one_step_intermediate_edge_probability": 6.400258097439299e-05
+  },
+  "trotter_observed_order_from_last_three_points": 2.0043358056518863,
+  "success_criteria": {
+    "coefficient_identities": true,
+    "all_six_four_collective_cubic_expansions": true,
+    "polarization_expanded_strang_step_matches_monomial_sequence": true,
+    "symmetric_product_formula_converges_second_order": true,
+    "eight_step_gate_mean_error_below_1e-3": true,
+    "cutoff_14_edge_probability_below_1e-4": true,
+    "large_amplitude_classical_mean_error_below_5_percent": true,
+    "passive_gaussian_map_action_converges_with_cutoff": true,
+    "all_24_map_compiled_factors_converge_with_cutoff": true,
+    "map_compiled_one_step_converges_with_cutoff": true,
+    "compiled_sequence_norm_error_below_1e-10": true,
+    "local_product_cutoff_14_intermediate_edge_probability_below_1e-4": true
+  },
+  "diagnostic_thresholds": {
+    "selected_cutoff_10_eight_step_compilation_residual_below_1e-3": false,
+    "selected_cutoff_10_eight_step_compilation_residual": 0.09394028257609692
+  },
+  "overall_local_product_cutoff_stress_audit_success": true,
+  "claim_boundary": "This local tensor-product cutoff audit establishes monotone convergence of the passive Gaussian compilation factors and records accumulated map truncation in the complete sequence. At cutoff 10 the eight-step physical/collective state residual remains above 1e-3 because independent local cutoffs are not invariant under passive mode mixing. The companion global-total-number audit validates the Gaussian compilation in a passive-invariant truncated space."
+}

@@ -93,9 +93,13 @@ def main() -> None:
 
     with args.kvn_summary.open(encoding="utf-8") as handle:
         sampled_audit = json.load(handle)
-    terms_per_active_helical_triad = (
+    calibration_helical_triads = sampled_audit.get(
+        "full_lattice_equivalent_helicity_triads",
+        sampled_audit["source_active_triads"],
+    )
+    terms_per_full_lattice_helical_triad = (
         sampled_audit["sparse_quadratic_terms_after_combination"]
-        / sampled_audit["source_active_triads"]
+        / calibration_helical_triads
     )
 
     rows: List[Dict[str, object]] = []
@@ -107,7 +111,7 @@ def main() -> None:
         dealiased_grid_points = dealiased_side**3
         triad_geometries = count_unordered_triad_geometries(cutoff)
         helical_triads = 8 * triad_geometries
-        estimated_direct_monomials = terms_per_active_helical_triad * helical_triads
+        estimated_direct_monomials = terms_per_full_lattice_helical_triad * helical_triads
         upper_direct_monomials = 24 * helical_triads
         structured_monomials = 6 * dealiased_grid_points
         rows.append(
@@ -163,7 +167,7 @@ def main() -> None:
         dealiased_grid_points = dealiased_side**3
         fitted_triads = math.exp(triad_log_prefactor) * wavevectors**triad_power
         fitted_helical = 8 * fitted_triads
-        direct_gate_estimate = 4 * terms_per_active_helical_triad * fitted_helical
+        direct_gate_estimate = 4 * terms_per_full_lattice_helical_triad * fitted_helical
         structured_primitive_count = 24 * dealiased_grid_points
         extrapolated_rows.append(
             {
@@ -200,12 +204,13 @@ def main() -> None:
                 "prevent a quadratic product from aliasing back into the retained |k_i|<=K cube."
             ),
         },
-        "sampled_global_audit_calibration": {
+        "global_audit_calibration": {
             "active_helical_triads": sampled_audit["source_active_triads"],
+            "full_lattice_equivalent_helicity_triads": calibration_helical_triads,
             "combined_real_quadratic_terms": sampled_audit[
                 "sparse_quadratic_terms_after_combination"
             ],
-            "observed_terms_per_active_helical_triad": terms_per_active_helical_triad,
+            "observed_terms_per_full_lattice_helical_triad": terms_per_full_lattice_helical_triad,
             "rigorous_real_monomial_upper_bound_per_helical_triad": 24,
         },
         "fitted_triad_scaling": {
