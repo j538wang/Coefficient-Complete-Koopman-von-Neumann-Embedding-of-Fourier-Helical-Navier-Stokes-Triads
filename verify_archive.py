@@ -140,6 +140,34 @@ def main() -> None:
     close(strang_rows[8]["maximum_abs_single_mode_cubic_strength"], 0.0031751043335554855)
     close(strang_rows[8]["total_abs_single_mode_cubic_strength"], 0.40641335469510215)
 
+    full8_manifest = load_json("reproducibility/eight_coordinate_cutoff/run_manifest.json")
+    assert full8_manifest["completed_cutoffs"] == [6, 8, 10, 12, 14, 16]
+    assert full8_manifest["monotonic_maximum_boundary_probability"] is True
+    assert full8_manifest["monotonic_final_mean_error_vs_classical"] is True
+    assert full8_manifest["reference_cutoff_for_direct_trajectory_comparison"] == 16
+    assert "same untruncated eight-mode product coherent state" in full8_manifest["initial_state_construction"]
+
+    full8_n14 = load_json("reproducibility/eight_coordinate_cutoff/N014_summary.json")
+    full8_n16 = load_json("reproducibility/eight_coordinate_cutoff/N016_summary.json")
+    assert full8_n14["hilbert_dimension"] == 319770
+    assert full8_n16["hilbert_dimension"] == 735471
+    assert full8_n16["initial_state_projected_and_renormalized_separately_for_each_cutoff"] is True
+    close(full8_n14["maximum_boundary_probability_last_two_shells"], 1.5119194786027343e-4)
+    close(full8_n16["maximum_boundary_probability_last_two_shells"], 1.0934690865451348e-5)
+    close(full8_n16["initial_projection_retained_probability"], 0.9999997158320072)
+
+    full8_convergence = {int(row["total_number_cutoff"]): row for row in load_csv(
+        "reproducibility/eight_coordinate_cutoff/cutoff_convergence.csv"
+    )}
+    close(full8_convergence[14]["relative_mean_trajectory_difference_vs_reference"], 2.2051809763838902e-5)
+    close(full8_convergence[14]["final_relative_covariance_frobenius_difference_vs_reference"], 2.5170266494757776e-4)
+
+    projection = load_json("reproducibility/eight_coordinate_cutoff/projection_verification.json")
+    assert projection["status"] == "PASS"
+    assert projection["tested_monomials"] == 24
+    close(projection["maximum_complete_product_relative_difference"], 0.0)
+    close(projection["maximum_factor_by_factor_projected_relative_difference"], 0.5773502691896258)
+
     resource = load_json("processed/full_spectral_resource_scaling/resource_scaling_summary.json")
     rows = {row["spectral_cutoff_K"]: row for row in resource["exact_rows"]}
     assert rows[1]["exact_noncollinear_unordered_triad_geometries"] == 44

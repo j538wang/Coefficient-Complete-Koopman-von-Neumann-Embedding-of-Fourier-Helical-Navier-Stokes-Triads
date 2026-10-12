@@ -1,0 +1,214 @@
+{
+  "status": "PASS",
+  "scope": "exact projected full-eight-real-coordinate KvN evolution; no Gaussian gate compilation in this scan",
+  "total_number_cutoff": 6,
+  "mode_count": 8,
+  "hilbert_dimension": 3003,
+  "hamiltonian_monomial_count": 24,
+  "hamiltonian_nnz": 25784,
+  "hamiltonian_hermiticity_relative_residual": 0.0,
+  "amplitude": 2.5,
+  "dimensionless_final_time": 0.18,
+  "output_points": 9,
+  "normalized_initial_condition": [
+    0.7840532622729933,
+    0.158935464636049,
+    0.5166549920660585,
+    -0.18859379410049826,
+    0.3151564858234369,
+    0.15223793693893056,
+    -0.2906737265131934,
+    0.07422118777635688
+  ],
+  "complex_mode_base_amplitudes": [
+    0.8,
+    0.55,
+    0.35,
+    -0.3
+  ],
+  "complex_mode_initial_phases_radians": [
+    0.2,
+    -0.35,
+    0.45,
+    -0.25
+  ],
+  "initial_quantum_state": "normalized P_N projection of a common untruncated eight-mode product coherent state",
+  "initial_coherent_displacements": [
+    1.3860234464116705,
+    0.2809608620379624,
+    0.9133256210594796,
+    -0.33338987674540455,
+    0.5571232206516857,
+    0.2691211939084195,
+    -0.5138434078256074,
+    0.1312057629609551
+  ],
+  "initial_conjugate_momentum_means": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "initial_state_projected_and_renormalized_separately_for_each_cutoff": true,
+  "initial_projection_retained_probability": 0.9259497139596257,
+  "initial_boundary_probability_last_two_shells": 0.23900315140014233,
+  "maximum_boundary_probability_last_two_shells": 0.2506376990402061,
+  "final_boundary_probability_last_two_shells": 0.2506376990402061,
+  "maximum_norm_error": 5.551115123125783e-16,
+  "initial_mean_total_occupation": 3.2853544928388456,
+  "maximum_mean_total_occupation": 3.3193092430316096,
+  "final_mean_total_occupation": 3.3193092430316096,
+  "initial_normalized_covariance_trace": 0.5476528369527753,
+  "maximum_normalized_covariance_trace": 0.5590100080571172,
+  "final_normalized_covariance_trace": 0.5590100080571172,
+  "initial_normalized_covariance_largest_eigenvalue": 0.07281824676768364,
+  "maximum_normalized_covariance_largest_eigenvalue": 0.09298871564892029,
+  "final_normalized_covariance_largest_eigenvalue": 0.09298871564892029,
+  "final_normalized_covariance_matrix": [
+    [
+      0.05274907433632592,
+      -0.004118055784729542,
+      -0.007364946649243507,
+      0.0023546857260892473,
+      -0.0018624172833287744,
+      -0.0007832804105041813,
+      0.010595030175196616,
+      -0.001716863306267129
+    ],
+    [
+      -0.004118055784729542,
+      0.07256709512023457,
+      -0.0023272480776840698,
+      0.010925149378265907,
+      -0.0008220612353903479,
+      0.0015159031193314654,
+      -0.0027066356059905817,
+      0.007644170680795843
+    ],
+    [
+      -0.007364946649243507,
+      -0.0023272480776840698,
+      0.06302533194389262,
+      0.0017927439054234995,
+      -0.015324989477198514,
+      -0.0033615640464472653,
+      0.0009192099857418867,
+      -0.0033027127170637983
+    ],
+    [
+      0.0023546857260892473,
+      0.010925149378265907,
+      0.0017927439054234995,
+      0.0731987909676014,
+      -0.0026815421968564212,
+      0.013549735114223516,
+      -0.00016418884421888437,
+      0.0018775082151427514
+    ],
+    [
+      -0.0018624172833287744,
+      -0.0008220612353903479,
+      -0.015324989477198514,
+      -0.0026815421968564212,
+      0.07573826654203064,
+      0.00034382905009477493,
+      -0.0024244176204048086,
+      -0.0005543492304928411
+    ],
+    [
+      -0.0007832804105041813,
+      0.0015159031193314654,
+      -0.0033615640464472653,
+      0.013549735114223516,
+      0.00034382905009477493,
+      0.07504643084577257,
+      -0.00031666675241738497,
+      -0.0018207853032953557
+    ],
+    [
+      0.010595030175196616,
+      -0.0027066356059905817,
+      0.0009192099857418867,
+      -0.00016418884421888437,
+      -0.0024244176204048086,
+      -0.00031666675241738497,
+      0.0743146460043976,
+      0.00040745217521429564
+    ],
+    [
+      -0.001716863306267129,
+      0.007644170680795843,
+      -0.0033027127170637983,
+      0.0018775082151427514,
+      -0.0005543492304928411,
+      -0.0018207853032953557,
+      0.00040745217521429564,
+      0.07237037229686184
+    ]
+  ],
+  "relative_mean_trajectory_error_vs_classical": 0.09489430640146952,
+  "final_relative_mean_error_vs_classical": 0.10360351941395352,
+  "final_normalized_quantum_means": [
+    0.742216629060989,
+    0.14813556310626955,
+    0.504405285222146,
+    -0.1429900300991478,
+    0.19399169340298242,
+    0.08816239706978031,
+    -0.1719760158043519,
+    0.1169075855099159
+  ],
+  "final_classical_state": [
+    0.8304203499698006,
+    0.16538866217881817,
+    0.5654720404192347,
+    -0.15175895397660535,
+    0.1965613877706619,
+    0.0870577927174366,
+    -0.17207862846041827,
+    0.13940133199785082
+  ],
+  "classical_energy_relative_drift": 2.96828458878137e-13,
+  "classical_helicity_relative_drift": 8.510332754111693e-14,
+  "build_seconds": 0.04628369980491698,
+  "evolution_seconds": 0.012215099995955825,
+  "total_seconds": 0.07534619979560375,
+  "analytic_validation": {
+    "maximum_complex_to_real_rhs_absolute_residual": 1.7763568394002505e-15,
+    "maximum_random_state_energy_derivative_residual": 1.8690640083921324e-15,
+    "maximum_random_state_helicity_derivative_residual": 4.991813416714096e-15
+  },
+  "source_provenance": {
+    "geometry_id": 745,
+    "K": [
+      3,
+      0,
+      -2
+    ],
+    "P": [
+      0,
+      -2,
+      -3
+    ],
+    "Q": [
+      3,
+      2,
+      1
+    ],
+    "source_csv_sha256": "68C38C50CF34986CE598178B0CEB994DA287E5A47C3E86CBFBAF64A129D8519C",
+    "gauge_real_complex_coefficients_plus": [
+      2.3044105177216543,
+      -0.04268891341563096,
+      -2.2617216043060235
+    ],
+    "gauge_real_complex_coefficients_minus": [
+      0.04268891341563096,
+      -2.3044105177216543,
+      2.261721604306023
+    ]
+  }
+}

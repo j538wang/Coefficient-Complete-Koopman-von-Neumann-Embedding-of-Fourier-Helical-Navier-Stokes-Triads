@@ -1,0 +1,223 @@
+{
+  "coordinate_order": [
+    "K_re",
+    "K_im",
+    "P_re",
+    "P_im",
+    "Qplus_re",
+    "Qplus_im",
+    "Qminus_re",
+    "Qminus_im"
+  ],
+  "initial_state_construction": {
+    "untruncated_state": "eight-mode product coherent state",
+    "coherent_displacements": "q_a(0)/sqrt(2), real",
+    "conjugate_momentum_means": 0.0,
+    "cutoff_state": "P_N |Psi_infinity(0)> / ||P_N |Psi_infinity(0)>||",
+    "same_untruncated_state_for_every_cutoff": true
+  },
+  "real_terms": [
+    {
+      "label": "Qplus:K_re<-P_re,Q_re",
+      "coefficient": 1.6294643037185843,
+      "target": 0,
+      "input_1": 2,
+      "input_2": 4
+    },
+    {
+      "label": "Qplus:K_re<-P_im,Q_im",
+      "coefficient": -1.6294643037185843,
+      "target": 0,
+      "input_1": 3,
+      "input_2": 5
+    },
+    {
+      "label": "Qplus:K_im<-P_re,Q_im",
+      "coefficient": 1.6294643037185843,
+      "target": 1,
+      "input_1": 2,
+      "input_2": 5
+    },
+    {
+      "label": "Qplus:K_im<-P_im,Q_re",
+      "coefficient": 1.6294643037185843,
+      "target": 1,
+      "input_1": 3,
+      "input_2": 4
+    },
+    {
+      "label": "Qplus:P_re<-K_re,Q_re",
+      "coefficient": -0.030185620157678034,
+      "target": 2,
+      "input_1": 0,
+      "input_2": 4
+    },
+    {
+      "label": "Qplus:P_re<-K_im,Q_im",
+      "coefficient": -0.030185620157678034,
+      "target": 2,
+      "input_1": 1,
+      "input_2": 5
+    },
+    {
+      "label": "Qplus:P_im<-K_im,Q_re",
+      "coefficient": -0.030185620157678034,
+      "target": 3,
+      "input_1": 1,
+      "input_2": 4
+    },
+    {
+      "label": "Qplus:P_im<-K_re,Q_im",
+      "coefficient": 0.030185620157678034,
+      "target": 3,
+      "input_1": 0,
+      "input_2": 5
+    },
+    {
+      "label": "Qplus:Qplus_re<-K_re,P_re",
+      "coefficient": -1.5992786835609065,
+      "target": 4,
+      "input_1": 0,
+      "input_2": 2
+    },
+    {
+      "label": "Qplus:Qplus_re<-K_im,P_im",
+      "coefficient": -1.5992786835609065,
+      "target": 4,
+      "input_1": 1,
+      "input_2": 3
+    },
+    {
+      "label": "Qplus:Qplus_im<-K_im,P_re",
+      "coefficient": -1.5992786835609065,
+      "target": 5,
+      "input_1": 1,
+      "input_2": 2
+    },
+    {
+      "label": "Qplus:Qplus_im<-K_re,P_im",
+      "coefficient": 1.5992786835609065,
+      "target": 5,
+      "input_1": 0,
+      "input_2": 3
+    },
+    {
+      "label": "Qminus:K_re<-P_re,Q_re",
+      "coefficient": 0.030185620157678034,
+      "target": 0,
+      "input_1": 2,
+      "input_2": 6
+    },
+    {
+      "label": "Qminus:K_re<-P_im,Q_im",
+      "coefficient": -0.030185620157678034,
+      "target": 0,
+      "input_1": 3,
+      "input_2": 7
+    },
+    {
+      "label": "Qminus:K_im<-P_re,Q_im",
+      "coefficient": 0.030185620157678034,
+      "target": 1,
+      "input_1": 2,
+      "input_2": 7
+    },
+    {
+      "label": "Qminus:K_im<-P_im,Q_re",
+      "coefficient": 0.030185620157678034,
+      "target": 1,
+      "input_1": 3,
+      "input_2": 6
+    },
+    {
+      "label": "Qminus:P_re<-K_re,Q_re",
+      "coefficient": -1.6294643037185843,
+      "target": 2,
+      "input_1": 0,
+      "input_2": 6
+    },
+    {
+      "label": "Qminus:P_re<-K_im,Q_im",
+      "coefficient": -1.6294643037185843,
+      "target": 2,
+      "input_1": 1,
+      "input_2": 7
+    },
+    {
+      "label": "Qminus:P_im<-K_im,Q_re",
+      "coefficient": -1.6294643037185843,
+      "target": 3,
+      "input_1": 1,
+      "input_2": 6
+    },
+    {
+      "label": "Qminus:P_im<-K_re,Q_im",
+      "coefficient": 1.6294643037185843,
+      "target": 3,
+      "input_1": 0,
+      "input_2": 7
+    },
+    {
+      "label": "Qminus:Qminus_re<-K_re,P_re",
+      "coefficient": 1.599278683560906,
+      "target": 6,
+      "input_1": 0,
+      "input_2": 2
+    },
+    {
+      "label": "Qminus:Qminus_re<-K_im,P_im",
+      "coefficient": 1.599278683560906,
+      "target": 6,
+      "input_1": 1,
+      "input_2": 3
+    },
+    {
+      "label": "Qminus:Qminus_im<-K_im,P_re",
+      "coefficient": 1.599278683560906,
+      "target": 7,
+      "input_1": 1,
+      "input_2": 2
+    },
+    {
+      "label": "Qminus:Qminus_im<-K_re,P_im",
+      "coefficient": -1.599278683560906,
+      "target": 7,
+      "input_1": 0,
+      "input_2": 3
+    }
+  ],
+  "analytic_validation": {
+    "maximum_complex_to_real_rhs_absolute_residual": 1.7763568394002505e-15,
+    "maximum_random_state_energy_derivative_residual": 1.8690640083921324e-15,
+    "maximum_random_state_helicity_derivative_residual": 4.991813416714096e-15
+  },
+  "source_provenance": {
+    "geometry_id": 745,
+    "K": [
+      3,
+      0,
+      -2
+    ],
+    "P": [
+      0,
+      -2,
+      -3
+    ],
+    "Q": [
+      3,
+      2,
+      1
+    ],
+    "source_csv_sha256": "68C38C50CF34986CE598178B0CEB994DA287E5A47C3E86CBFBAF64A129D8519C",
+    "gauge_real_complex_coefficients_plus": [
+      2.3044105177216543,
+      -0.04268891341563096,
+      -2.2617216043060235
+    ],
+    "gauge_real_complex_coefficients_minus": [
+      0.04268891341563096,
+      -2.3044105177216543,
+      2.261721604306023
+    ]
+  }
+}

@@ -2,7 +2,7 @@
 
 This public repository contains the code and processed data supporting the manuscript **Coefficient-Complete Koopman--von Neumann Embedding of Fourier--Helical Navier--Stokes Triads** by Jialin Wang, Fue-Sang Lien, and Eugene Yee.
 
-It contains the scripts and processed outputs used for the coefficient ensemble, complete $K_{\max}=3$ shared-scale graph audit, global Koopman--von Neumann (KvN) assembly, restricted Gaussian and cubic gate calculation, spectral resource enumeration, Taylor--Green vortex (TGV) checks, and Johns Hopkins Turbulence Database (JHTDB) checks.
+It contains the scripts and processed outputs used for the coefficient ensemble, complete $K_{\max}=3$ shared-scale graph audit, global Koopman--von Neumann (KvN) assembly, restricted Gaussian and cubic gate calculation, the complete eight-real-coordinate cutoff scan, spectral resource enumeration, Taylor--Green vortex (TGV) checks, and Johns Hopkins Turbulence Database (JHTDB) checks.
 
 ## Quick verification
 
@@ -21,6 +21,7 @@ After an intentional archive update, regenerate the manifest with `python genera
 - `code/tgv` contains the serial and MPI TGV evolution and post-processing scripts, including the batch scripts used on Alliance Canada.
 - `code/jhtdb` contains the JHTDB acquisition and helical reconstruction scripts.
 - `processed` contains the machine-readable CSV, JSON, TXT, and NPZ inputs and outputs used in the manuscript.
+- `reproducibility/eight_coordinate_cutoff` contains the self-contained revision calculation for the complete eight-real-coordinate two-triad model, including all six cutoff outputs and the independent projection-convention test.
 - `figures` contains the external figure files included by the LaTeX manuscript.
 - `MANIFEST.csv` records the SHA-256 digest, byte size, and path of every archived file except the manifest itself.
 
@@ -76,6 +77,19 @@ python code/core/make_gaussian_bplus_figure.py --local-cutoff derived/kvn_two_tr
 
 The processed B+ directory records the residual after every subgate, the boundary population, the Gaussian and non-Gaussian gate counts, and the maximum and total cubic strengths.
 
+## Complete eight-coordinate cutoff workflow
+
+The revision calculation removes the four-coordinate real-invariant restriction and directly evolves the complete 24-term projected KvN Hamiltonian in eight real coordinates.  Every cutoff is initialized by projecting and renormalizing the same untruncated eight-mode product coherent state.  The projection convention is `P_N (p_a q_b q_c) P_N`; it is not the product of three separately projected factors.
+
+```text
+cd reproducibility/eight_coordinate_cutoff
+python run_full8_cutoff.py --cutoffs 6,8,10,12,14,16 --out .
+python verify_projection_convention.py --cutoff 2 --out projection_verification.json
+python plot_cutoff_trend.py --results-dir . --output-stem ../../figures/eight_coordinate_cutoff_trend
+```
+
+The global total-number dimensions range from 3,003 at `N=6` to 735,471 at `N=16`.  Over the nine sampled times, the maximum last-two-shell population decreases monotonically from `2.5064e-1` to `1.0935e-5`.  Relative to the finite `N=16` reference, the complete `N=14` first-moment trajectory differs by `2.2052e-5`, and its final covariance matrix differs by `2.5170e-4`.  These are finite-reference results for the stated initial state, interval, sampling grid, and cutoff range; they are not an infinite-cutoff proof or an eight-mode gate compilation.
+
 ## TGV workflow
 
 The processed sparse peak state is provided at `processed/tgv/state/tgv_peak_sparse_modes.npz`. It was obtained from a dealiased periodic `128^3` pseudo-spectral calculation with `nu=1/1600`, fourth-order Runge--Kutta time stepping, `dt=0.002`, and the exported snapshot at `t=8.97`. The Alliance Canada scripts and the MPI implementation in `code/tgv` document the full evolution.
@@ -104,7 +118,7 @@ Repeat the commands for the other seven time indices and then pass the eight `*_
 
 ## Scope
 
-The archive reproduces the conservative coefficient and operator audits reported in the manuscript. The restricted four-coordinate calculation validates ideal passive Gaussian map--single-mode-cubic--inverse-map circuits under two independent truncation schemes. The resource calculation is a structured primitive-count analysis. Extension to the full eight-coordinate complex network, physical cubic-gate imperfections, viscous quantum evolution, fault-tolerant synthesis, and end-to-end speedup remain open.
+The archive reproduces the conservative coefficient and operator audits reported in the manuscript. The restricted four-coordinate calculation validates ideal passive Gaussian map--single-mode-cubic--inverse-map circuits under two independent truncation schemes. Direct finite-cutoff evolution now covers the complete eight-coordinate two-triad model, while gate-level compilation of that complete model remains open. The resource calculation is a structured primitive-count analysis. Physical cubic-gate imperfections, viscous quantum evolution, fault-tolerant synthesis, and end-to-end speedup remain open.
 
 ## Data availability
 

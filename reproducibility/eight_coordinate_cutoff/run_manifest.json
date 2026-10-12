@@ -1,0 +1,27 @@
+{
+  "status": "COMPLETED_CUTOFFS_ONLY",
+  "completed_cutoffs": [
+    6,
+    8,
+    10,
+    12,
+    14,
+    16
+  ],
+  "boundary_maximum_scope": "maximum over the nine sampled output times for each cutoff",
+  "reference_interpretation": "the largest completed cutoff is a finite numerical reference, not an infinite-cutoff limit",
+  "initial_state_construction": "each cutoff is the normalized P_N projection of the same untruncated eight-mode product coherent state",
+  "projection_convention": "P_N H P_N with each complete cubic monomial projected only after forming the full product",
+  "projection_verification": "projection_verification.json",
+  "monotonic_maximum_boundary_probability": true,
+  "monotonic_final_mean_error_vs_classical": true,
+  "reference_cutoff_for_direct_trajectory_comparison": 16,
+  "summaries": [
+    "N006_summary.json",
+    "N008_summary.json",
+    "N010_summary.json",
+    "N012_summary.json",
+    "N014_summary.json",
+    "N016_summary.json"
+  ]
+}

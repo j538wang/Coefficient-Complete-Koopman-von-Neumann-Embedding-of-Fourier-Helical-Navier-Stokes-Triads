@@ -1,0 +1,161 @@
+{
+  "status": "PASS",
+  "tested_cutoff": 2,
+  "total_number_basis_dimension": 45,
+  "embedding_local_dimension": 4,
+  "embedding_tensor_dimension": 65536,
+  "tested_monomials": 24,
+  "maximum_complete_product_absolute_difference": 0.0,
+  "maximum_complete_product_relative_difference": 0.0,
+  "summed_complete_product_relative_difference": 0.0,
+  "production_build_relative_difference": 0.0,
+  "maximum_factor_by_factor_projected_relative_difference": 0.5773502691896258,
+  "summed_factor_by_factor_projected_relative_difference": 0.4976359205623749,
+  "interpretation": "The production matrices equal P_N(p_a q_b q_c)P_N. Multiplying P_N p_a P_N, P_N q_b P_N, and P_N q_c P_N is detectably different.",
+  "per_term": [
+    {
+      "label": "Qplus:K_re<-P_re,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qplus:K_re<-P_im,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qplus:K_im<-P_re,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qplus:K_im<-P_im,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qplus:P_re<-K_re,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:P_re<-K_im,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:P_im<-K_im,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:P_im<-K_re,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:Qplus_re<-K_re,P_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:Qplus_re<-K_im,P_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:Qplus_im<-K_im,P_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qplus:Qplus_im<-K_re,P_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:K_re<-P_re,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:K_re<-P_im,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:K_im<-P_re,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:K_im<-P_im,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:P_re<-K_re,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qminus:P_re<-K_im,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qminus:P_im<-K_im,Q_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qminus:P_im<-K_re,Q_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896258
+    },
+    {
+      "label": "Qminus:Qminus_re<-K_re,P_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:Qminus_re<-K_im,P_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:Qminus_im<-K_im,P_re",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    },
+    {
+      "label": "Qminus:Qminus_im<-K_re,P_im",
+      "complete_product_absolute_difference": 0.0,
+      "complete_product_relative_difference": 0.0,
+      "factor_by_factor_projected_relative_difference": 0.5773502691896257
+    }
+  ]
+}

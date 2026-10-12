@@ -1,0 +1,10 @@
+Recorded execution environment for the reviewer-response cutoff scan
+
+Operating system: Windows 10.0.26200 (64-bit)
+Python: 3.11.8
+NumPy: 1.26.4
+SciPy: 1.12.0
+Matplotlib: 3.8.3
+
+The calculation uses only Python's standard library plus NumPy and SciPy.
+Matplotlib is required only to regenerate the summary figure.
