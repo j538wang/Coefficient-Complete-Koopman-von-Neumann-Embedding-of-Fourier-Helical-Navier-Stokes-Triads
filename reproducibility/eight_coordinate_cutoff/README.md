@@ -17,7 +17,23 @@ untruncated product coherent state with real displacements
 the code applies `P_N` to this same untruncated state and renormalizes the
 result; it does not choose a new state that merely shares the same first
 moments.  Each summary JSON records the displacements and the probability
-retained by the initial projection.  The scan reports the probability in the last two total
+retained by the initial projection.  The aggregate-only diagnostic also records
+the exact finite-cutoff first-moment scale factor
+`Pr_lambda(X<=N-1)/Pr_lambda(X<=N)`, where `lambda` is the untruncated mean
+total occupation.  Thus the finite-cutoff first moments need not equal the
+untruncated classical coordinates at `tau=0`; the recorded projection bias
+decreases with `N`.
+
+The dynamical covariance uses the truncated coordinate operators
+`Q_a^(N)=P_N q_a P_N` and forms the symmetrized products of those operators.
+This is generally different from projecting a complete quadratic operator,
+`P_N {q_a,q_b} P_N/2`, because an intermediate state can cross the
+total-number boundary.  `initial_projection_diagnostics.csv` and `.json`
+record the initial covariance-trace difference between the two conventions;
+the scan itself retains the first, internally consistent truncated-coordinate
+definition.
+
+The scan reports the probability in the last two total
 number shells at nine sampled output times, norm conservation, classical
 invariant checks, and first-moment agreement with the corresponding full
 eight-coordinate classical trajectory.  The reported maximum boundary
@@ -28,13 +44,17 @@ Example:
 
 ```text
 python run_full8_cutoff.py --cutoffs 6,8,10,12,14,16 --out .
+python run_full8_cutoff.py --aggregate-only --out .
 python verify_projection_convention.py --cutoff 2 --out projection_verification.json
 python plot_cutoff_trend.py --results-dir . --output-stem eight_coordinate_cutoff_trend
 ```
 
 Each cutoff writes an independent JSON summary and trajectory CSV so an
 interrupted scan can be resumed one cutoff at a time.  `cutoff_summary.csv`
-and `run_manifest.json` aggregate only completed cases.  The scan uses the
+and `run_manifest.json` aggregate only completed cases, while
+`initial_projection_diagnostics.csv` and `.json` separate the initial
+projection bias and covariance-observable convention without rerunning the
+evolution.  The scan uses the
 complete-product convention `P_N (p_a q_b q_c) P_N`.  The independent
 `verify_projection_convention.py` test constructs the same operators in a
 larger tensor-product space before restriction and also demonstrates that

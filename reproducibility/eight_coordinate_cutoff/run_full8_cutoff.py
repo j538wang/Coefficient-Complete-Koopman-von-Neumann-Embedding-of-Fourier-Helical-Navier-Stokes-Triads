@@ -296,6 +296,57 @@ def write_csv(path: Path, rows: Iterable[Dict[str, object]]) -> None:
         writer.writerows(records)
 
 
+def initial_projection_diagnostic(summary: Dict[str, object]) -> Dict[str, object]:
+    """Return analytic diagnostics for the projected coherent initial state.
+
+    The total occupation of the untruncated product coherent state is Poisson
+    with mean lambda.  Conditioning on N_tot <= N multiplies every position
+    first moment by Pr(X <= N-1) / Pr(X <= N).  For the covariance trace, the
+    difference between the complete quadratic projection P_N q_a^2 P_N and
+    the truncated-coordinate product (P_N q_a P_N)^2 is an exact boundary
+    contribution.  Only this trace diagnostic is compared here; the reported
+    dynamical covariance continues to use the truncated-coordinate operators.
+    """
+    cutoff = int(summary["total_number_cutoff"])
+    amplitude = float(summary["amplitude"])
+    direction = np.asarray(summary["normalized_initial_condition"], dtype=float)
+    mode_count = int(summary["mode_count"])
+    mean_total_occupation = 0.5 * amplitude**2 * float(np.dot(direction, direction))
+    poisson_probabilities = [
+        math.exp(-mean_total_occupation)
+        * mean_total_occupation**number
+        / math.factorial(number)
+        for number in range(cutoff + 1)
+    ]
+    retained_probability = float(sum(poisson_probabilities))
+    recorded_retained_probability = float(summary["initial_projection_retained_probability"])
+    if abs(retained_probability - recorded_retained_probability) > 5e-13:
+        raise RuntimeError(
+            "analytic and recorded initial projection probabilities disagree: "
+            f"{retained_probability} versus {recorded_retained_probability}"
+        )
+    exact_boundary_probability = float(poisson_probabilities[-1] / retained_probability)
+    first_moment_scale = 1.0 - exact_boundary_probability
+    projected_coordinate_trace = float(summary["initial_normalized_covariance_trace"])
+    trace_difference = (
+        (cutoff + mode_count)
+        * exact_boundary_probability
+        / (2.0 * amplitude**2)
+    )
+    return {
+        "total_number_cutoff": cutoff,
+        "untruncated_initial_mean_total_occupation": mean_total_occupation,
+        "initial_projection_retained_probability_analytic": retained_probability,
+        "initial_exact_cutoff_boundary_probability": exact_boundary_probability,
+        "initial_first_moment_scale_factor": first_moment_scale,
+        "initial_relative_first_moment_projection_bias": exact_boundary_probability,
+        "initial_normalized_covariance_trace_projected_coordinate_product": projected_coordinate_trace,
+        "initial_normalized_covariance_trace_complete_quadratic_projection": projected_coordinate_trace
+        + trace_difference,
+        "initial_normalized_covariance_trace_convention_absolute_difference": trace_difference,
+    }
+
+
 def run_cutoff(
     total_cutoff: int,
     amplitude: float,
@@ -491,6 +542,24 @@ def aggregate_existing(out: Path) -> None:
         "total_seconds",
     )
     write_csv(out / "cutoff_summary.csv", ({field: item[field] for field in fields} for item in summaries))
+    initial_diagnostics = [initial_projection_diagnostic(item) for item in summaries]
+    write_csv(out / "initial_projection_diagnostics.csv", initial_diagnostics)
+    (out / "initial_projection_diagnostics.json").write_text(
+        json.dumps(
+            {
+                "status": "PASS",
+                "scope": "analytic initial-state diagnostic; no time evolution is recomputed",
+                "first_moment_formula": "Pr_lambda(X<=N-1)/Pr_lambda(X<=N)",
+                "covariance_convention_used_in_scan": "Q_a^(N)=P_N q_a P_N and Gamma_ab=A^-2[<{Q_a^(N),Q_b^(N)}>/2-<Q_a^(N)><Q_b^(N)>]",
+                "comparison_convention": "complete quadratic projection P_N {q_a,q_b} P_N/2",
+                "covariance_comparison_scope": "initial normalized covariance trace only",
+                "rows": initial_diagnostics,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
     trajectories: Dict[int, np.ndarray] = {}
     for item in summaries:
         cutoff = int(item["total_number_cutoff"])
@@ -557,6 +626,11 @@ def aggregate_existing(out: Path) -> None:
         "reference_interpretation": "the largest completed cutoff is a finite numerical reference, not an infinite-cutoff limit",
         "initial_state_construction": "each cutoff is the normalized P_N projection of the same untruncated eight-mode product coherent state",
         "projection_convention": "P_N H P_N with each complete cubic monomial projected only after forming the full product",
+        "covariance_convention": "Q_a^(N)=P_N q_a P_N; covariance is formed from anticommutators of these truncated coordinate operators",
+        "initial_projection_diagnostics": [
+            "initial_projection_diagnostics.csv",
+            "initial_projection_diagnostics.json",
+        ],
         "projection_verification": "projection_verification.json" if (out / "projection_verification.json").exists() else "not_run",
         "monotonic_maximum_boundary_probability": all(
             later["maximum_boundary_probability_last_two_shells"] < earlier["maximum_boundary_probability_last_two_shells"]
@@ -579,6 +653,11 @@ def main() -> None:
     parser.add_argument("--tau-end", type=float, default=0.18)
     parser.add_argument("--output-points", type=int, default=9)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--aggregate-only",
+        action="store_true",
+        help="refresh aggregate tables and initial-state diagnostics without rerunning time evolution",
+    )
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     terms = real_terms()
@@ -594,13 +673,19 @@ def main() -> None:
             "cutoff_state": "P_N |Psi_infinity(0)> / ||P_N |Psi_infinity(0)>||",
             "same_untruncated_state_for_every_cutoff": True,
         },
+        "covariance_convention": {
+            "truncated_coordinate_operator": "Q_a^(N)=P_N q_a P_N",
+            "reported_covariance": "A^-2[<{Q_a^(N),Q_b^(N)}>/2-<Q_a^(N)><Q_b^(N)>]",
+            "not_identical_to": "A^-2[<P_N {q_a,q_b} P_N>/2-<Q_a^(N)><Q_b^(N)>]",
+        },
         "real_terms": [asdict(term) for term in terms],
         "analytic_validation": validation,
         "source_provenance": SOURCE_PROVENANCE,
     }
     (args.out / "model_definition.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
-    for cutoff in (int(value) for value in args.cutoffs.split(",") if value.strip()):
-        run_cutoff(cutoff, args.amplitude, args.tau_end, args.output_points, args.out, terms, validation)
+    if not args.aggregate_only:
+        for cutoff in (int(value) for value in args.cutoffs.split(",") if value.strip()):
+            run_cutoff(cutoff, args.amplitude, args.tau_end, args.output_points, args.out, terms, validation)
     aggregate_existing(args.out)
 
 

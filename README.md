@@ -79,16 +79,17 @@ The processed B+ directory records the residual after every subgate, the boundar
 
 ## Complete eight-coordinate cutoff workflow
 
-The revision calculation removes the four-coordinate real-invariant restriction and directly evolves the complete 24-term projected KvN Hamiltonian in eight real coordinates.  Every cutoff is initialized by projecting and renormalizing the same untruncated eight-mode product coherent state.  The projection convention is `P_N (p_a q_b q_c) P_N`; it is not the product of three separately projected factors.
+The revision calculation removes the four-coordinate real-invariant restriction and directly evolves the complete 24-term projected KvN Hamiltonian in eight real coordinates.  Every cutoff is initialized by projecting and renormalizing the same untruncated eight-mode product coherent state.  The Hamiltonian projection convention is `P_N (p_a q_b q_c) P_N`; it is not the product of three separately projected factors.  The reported covariance separately uses the truncated coordinates `Q_a^(N)=P_N q_a P_N`.  This is an internally consistent finite model, but it is not identical to projecting a complete quadratic observable after it is formed.
 
 ```text
 cd reproducibility/eight_coordinate_cutoff
 python run_full8_cutoff.py --cutoffs 6,8,10,12,14,16 --out .
+python run_full8_cutoff.py --aggregate-only --out .
 python verify_projection_convention.py --cutoff 2 --out projection_verification.json
 python plot_cutoff_trend.py --results-dir . --output-stem ../../figures/eight_coordinate_cutoff_trend
 ```
 
-The global total-number dimensions range from 3,003 at `N=6` to 735,471 at `N=16`.  Over the nine sampled times, the maximum last-two-shell population decreases monotonically from `2.5064e-1` to `1.0935e-5`.  Relative to the finite `N=16` reference, the complete `N=14` first-moment trajectory differs by `2.2052e-5`, and its final covariance matrix differs by `2.5170e-4`.  These are finite-reference results for the stated initial state, interval, sampling grid, and cutoff range; they are not an infinite-cutoff proof or an eight-mode gate compilation.
+The global total-number dimensions range from 3,003 at `N=6` to 735,471 at `N=16`.  Over the nine sampled times, the maximum last-two-shell population decreases monotonically from `2.5064e-1` to `1.0935e-5`.  Relative to the finite `N=16` reference, the complete `N=14` first-moment trajectory differs by `2.2052e-5`, and its final covariance matrix differs by `2.5170e-4`.  The additional `initial_projection_diagnostics.csv` and `.json` files quantify two finite-cutoff effects at `tau=0`: the coherent-state first-moment shrinkage and the covariance-trace difference between truncated-coordinate products and complete quadratic projection.  The first-moment bias decreases from `8.9772e-2` at `N=6` to `1.0734e-6` at `N=16`; the normalized covariance-trace convention difference decreases from `1.0054e-1` to `2.0609e-6`.  These are finite-reference results for the stated initial state, interval, sampling grid, and cutoff range; they are not an infinite-cutoff proof or an eight-mode gate compilation.
 
 ## TGV workflow
 

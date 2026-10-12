@@ -1,0 +1,76 @@
+{
+  "status": "PASS",
+  "scope": "analytic initial-state diagnostic; no time evolution is recomputed",
+  "first_moment_formula": "Pr_lambda(X<=N-1)/Pr_lambda(X<=N)",
+  "covariance_convention_used_in_scan": "Q_a^(N)=P_N q_a P_N and Gamma_ab=A^-2[<{Q_a^(N),Q_b^(N)}>/2-<Q_a^(N)><Q_b^(N)>]",
+  "comparison_convention": "complete quadratic projection P_N {q_a,q_b} P_N/2",
+  "covariance_comparison_scope": "initial normalized covariance trace only",
+  "rows": [
+    {
+      "total_number_cutoff": 6,
+      "untruncated_initial_mean_total_occupation": 3.609375000000001,
+      "initial_projection_retained_probability_analytic": 0.9259497139596252,
+      "initial_exact_cutoff_boundary_probability": 0.08977191540395599,
+      "initial_first_moment_scale_factor": 0.910228084596044,
+      "initial_relative_first_moment_projection_bias": 0.08977191540395599,
+      "initial_normalized_covariance_trace_projected_coordinate_product": 0.5476528369527753,
+      "initial_normalized_covariance_trace_complete_quadratic_projection": 0.6481973822052061,
+      "initial_normalized_covariance_trace_convention_absolute_difference": 0.1005445452524307
+    },
+    {
+      "total_number_cutoff": 8,
+      "untruncated_initial_mean_total_occupation": 3.609375000000001,
+      "initial_projection_retained_probability_analytic": 0.9881483286556999,
+      "initial_exact_cutoff_boundary_probability": 0.019569590490493016,
+      "initial_first_moment_scale_factor": 0.980430409509507,
+      "initial_relative_first_moment_projection_bias": 0.019569590490493016,
+      "initial_normalized_covariance_trace_projected_coordinate_product": 0.6120623963137368,
+      "initial_normalized_covariance_trace_complete_quadratic_projection": 0.6371114721415679,
+      "initial_normalized_covariance_trace_convention_absolute_difference": 0.02504907582783106
+    },
+    {
+      "total_number_cutoff": 10,
+      "untruncated_initial_mean_total_occupation": 3.609375000000001,
+      "initial_projection_retained_probability_analytic": 0.9987026802034222,
+      "initial_exact_cutoff_boundary_probability": 0.0028027810028486144,
+      "initial_first_moment_scale_factor": 0.9971972189971514,
+      "initial_relative_first_moment_projection_bias": 0.0028027810028486144,
+      "initial_normalized_covariance_trace_projected_coordinate_product": 0.6347076846131715,
+      "initial_normalized_covariance_trace_complete_quadratic_projection": 0.6387436892572735,
+      "initial_normalized_covariance_trace_convention_absolute_difference": 0.0040360046441020045
+    },
+    {
+      "total_number_cutoff": 12,
+      "untruncated_initial_mean_total_occupation": 3.609375000000001,
+      "initial_projection_retained_probability_analytic": 0.9998974080038788,
+      "initial_exact_cutoff_boundary_probability": 0.00027628672509237703,
+      "initial_first_moment_scale_factor": 0.9997237132749076,
+      "initial_relative_first_moment_projection_bias": 0.00027628672509237703,
+      "initial_normalized_covariance_trace_projected_coordinate_product": 0.6393464937289772,
+      "initial_normalized_covariance_trace_complete_quadratic_projection": 0.639788552489125,
+      "initial_normalized_covariance_trace_convention_absolute_difference": 0.0004420587601478032
+    },
+    {
+      "total_number_cutoff": 14,
+      "untruncated_initial_mean_total_occupation": 3.609375000000001,
+      "initial_projection_retained_probability_analytic": 0.999993884166563,
+      "initial_exact_cutoff_boundary_probability": 1.9774738135127162e-05,
+      "initial_first_moment_scale_factor": 0.9999802252618649,
+      "initial_relative_first_moment_projection_bias": 1.9774738135127162e-05,
+      "initial_normalized_covariance_trace_projected_coordinate_product": 0.6399437404183537,
+      "initial_normalized_covariance_trace_complete_quadratic_projection": 0.6399785439574714,
+      "initial_normalized_covariance_trace_convention_absolute_difference": 3.480353911782381e-05
+    },
+    {
+      "total_number_cutoff": 16,
+      "untruncated_initial_mean_total_occupation": 3.609375000000001,
+      "initial_projection_retained_probability_analytic": 0.9999997158320072,
+      "initial_exact_cutoff_boundary_probability": 1.0733984863836187e-06,
+      "initial_first_moment_scale_factor": 0.9999989266015136,
+      "initial_relative_first_moment_projection_bias": 1.0733984863836187e-06,
+      "initial_normalized_covariance_trace_projected_coordinate_product": 0.6399964309487034,
+      "initial_normalized_covariance_trace_complete_quadratic_projection": 0.6399984918737972,
+      "initial_normalized_covariance_trace_convention_absolute_difference": 2.060925093856548e-06
+    }
+  ]
+}

@@ -162,6 +162,26 @@ def main() -> None:
     close(full8_convergence[14]["relative_mean_trajectory_difference_vs_reference"], 2.2051809763838902e-5)
     close(full8_convergence[14]["final_relative_covariance_frobenius_difference_vs_reference"], 2.5170266494757776e-4)
 
+    initial_diagnostics = {int(row["total_number_cutoff"]): row for row in load_csv(
+        "reproducibility/eight_coordinate_cutoff/initial_projection_diagnostics.csv"
+    )}
+    close(initial_diagnostics[6]["untruncated_initial_mean_total_occupation"], 3.609375)
+    close(initial_diagnostics[6]["initial_relative_first_moment_projection_bias"], 8.977191540395599e-2)
+    close(initial_diagnostics[16]["initial_relative_first_moment_projection_bias"], 1.0733984863836187e-6)
+    close(
+        initial_diagnostics[6]["initial_normalized_covariance_trace_convention_absolute_difference"],
+        1.005445452524307e-1,
+    )
+    close(
+        initial_diagnostics[16]["initial_normalized_covariance_trace_convention_absolute_difference"],
+        2.060925093856548e-6,
+    )
+    initial_diagnostics_json = load_json(
+        "reproducibility/eight_coordinate_cutoff/initial_projection_diagnostics.json"
+    )
+    assert initial_diagnostics_json["status"] == "PASS"
+    assert initial_diagnostics_json["covariance_comparison_scope"] == "initial normalized covariance trace only"
+
     projection = load_json("reproducibility/eight_coordinate_cutoff/projection_verification.json")
     assert projection["status"] == "PASS"
     assert projection["tested_monomials"] == 24

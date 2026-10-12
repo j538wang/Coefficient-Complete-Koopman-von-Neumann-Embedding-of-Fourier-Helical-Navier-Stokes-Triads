@@ -16,6 +16,11 @@
     "cutoff_state": "P_N |Psi_infinity(0)> / ||P_N |Psi_infinity(0)>||",
     "same_untruncated_state_for_every_cutoff": true
   },
+  "covariance_convention": {
+    "truncated_coordinate_operator": "Q_a^(N)=P_N q_a P_N",
+    "reported_covariance": "A^-2[<{Q_a^(N),Q_b^(N)}>/2-<Q_a^(N)><Q_b^(N)>]",
+    "not_identical_to": "A^-2[<P_N {q_a,q_b} P_N>/2-<Q_a^(N)><Q_b^(N)>]"
+  },
   "real_terms": [
     {
       "label": "Qplus:K_re<-P_re,Q_re",
